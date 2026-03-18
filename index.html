@@ -1,0 +1,2611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weaver</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='12' fill='%23989898'/></svg>">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    weaver
+  </div>
+  <div class="export-toolbar">
+    <select id="exportRes" class="res-select export-select">
+      <option value="svg">SVG</option>
+      <option value="1024">PNG 1k</option>
+      <option value="2048">PNG 2k</option>
+      <option value="4096" selected>PNG 4k</option>
+      <option value="8192">PNG 8k</option>
+    </select>
+    <button class="btn-save export-btn" id="saveBtn" type="button" aria-label="Save image" title="Save image">
+      <svg class="export-btn-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M12 4V14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+        <path d="M8.5 10.5L12 14L15.5 10.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+        <path d="M5 18H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+      </svg>
+    </button>
+  </div>
+
+  <div class="right-panel" id="rightPanel">
+    <div class="preview-shell">
+      <canvas id="loomCanvas" aria-label="Editable loom pattern preview"></canvas>
+      <button id="squishTopHandle" class="edge-squish-handle top" type="button" title="Drag to compress from the top edge"></button>
+      <button id="squishRightHandle" class="edge-squish-handle right" type="button" title="Drag to compress from the right edge"></button>
+      <button id="squishBottomHandle" class="edge-squish-handle bottom" type="button" title="Drag to compress from the bottom edge"></button>
+      <button id="squishLeftHandle" class="edge-squish-handle left" type="button" title="Drag to compress from the left edge"></button>
+      <button id="canvasResizeHandle" class="canvas-resize-handle" type="button" title="Drag to resize weave pixels"></button>
+    </div>
+  </div>
+
+  <div class="widget" id="controlWidget">
+    <!-- <img class="screw screw-tl" src="assets/screw.png" alt="">
+    <img class="screw screw-tr" src="assets/screw.png" alt="">
+    <img class="screw screw-bl" src="assets/screw.png" alt="">
+    <img class="screw screw-br" src="assets/screw.png" alt=""> -->
+
+    <div class="widget-header" id="widgetDragHandle" title="Click to expand / collapse · Drag to move">
+      <span class="widget-title">
+       controls
+        <svg class="chevron-icon" width="13" height="8" viewBox="0 0 13 9" fill="none" aria-hidden="true">
+          <path d="M1 7L6.5 1.5L12 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+      </span>
+    </div>
+
+    <div class="widget-body-wrap">
+    <div class="widget-body">
+      <div class="widget-tabs" role="tablist" aria-label="Control panels">
+        <button id="tabWeaveBtn" class="widget-tab active" type="button" role="tab" aria-selected="true" aria-controls="weaveTabPanel" aria-label="Weave tab" title="Weave">
+          <span class="widget-tab-icon icon-weave" aria-hidden="true"></span>
+        </button>
+        <button id="tabOverlayBtn" class="widget-tab" type="button" role="tab" aria-selected="false" aria-controls="overlayTabPanel" aria-label="Shapes tab" title="Shapes">
+          <span class="widget-tab-icon icon-shapes" aria-hidden="true"></span>
+        </button>
+        <button id="tabTypeBtn" class="widget-tab" type="button" role="tab" aria-selected="false" aria-controls="typeTabPanel" aria-label="Type tab" title="Type">
+          <span class="widget-tab-icon icon-type" aria-hidden="true"></span>
+        </button>
+      </div>
+      <div id="weaveTabPanel" class="widget-tab-panel active" role="tabpanel" aria-labelledby="tabWeaveBtn">
+      <div class="weave-builder">
+        <!-- <div class="lbl">base weave</div> -->
+        <div>
+          <!-- <div class="lbl">Weave Mode</div> -->
+          <select id="weaveModeSelect" class="res-select">
+            <option value="checker">Over-Under</option>
+            <option value="row">Rows on Top</option>
+            <option value="col">Columns on Top</option>
+          </select>
+        </div>
+        <!-- <div class="field-hint">Drag the numbered circle to reorder a stripe, use the center slider for thickness, and the right color wheel to recolor it.</div> -->
+        <div class="stripe-programs">
+          <div class="stripe-program-group">
+            <div class="lbl with-value">
+              <span>Row Threads</span>
+              <span class="inline-action-group">
+                <span id="rowStripeSummary">0 bands</span>
+                <button id="addRowStripeBtn" class="icon-circle-btn" type="button" aria-label="Add row stripe" title="Add row stripe">+</button>
+              </span>
+      </div>
+            <div id="rowStripeEditor" class="stripe-editor"></div>
+      </div>
+          <div class="stripe-program-group">
+            <div class="lbl with-value">
+              <span>Column Threads</span>
+              <span class="inline-action-group">
+                <span id="colStripeSummary">0 bands</span>
+                <button id="addColStripeBtn" class="icon-circle-btn" type="button" aria-label="Add column stripe" title="Add column stripe">+</button>
+              </span>
+        </div>
+            <div id="colStripeEditor" class="stripe-editor"></div>
+      </div>
+      </div>
+      </div>
+
+      <div>
+          <div class="lbl">Background</div>
+          <input id="backgroundInput" class="color-field" type="color" value="#d7d1ca">
+      </div>
+
+        <div class="grid-2">
+      <div>
+            <div class="lbl">Rows</div>
+            <div class="value-slider-wrap">
+              <input id="rowsInput" class="pill-slider value-slider" type="range" min="4" max="96" value="96" step="1">
+              <span id="rowsValue" class="value-slider-readout">96</span>
+            </div>
+      </div>
+      <div>
+            <div class="lbl">Columns</div>
+            <div class="value-slider-wrap">
+              <input id="colsInput" class="pill-slider value-slider" type="range" min="4" max="96" value="96" step="1">
+              <span id="colsValue" class="value-slider-readout">96</span>
+            </div>
+      </div>
+      </div>
+     
+        <div class="action-row">
+          <button id="randomizeBtn" class="action-btn" type="button">Randomize</button>
+          <button id="clearBtn" class="action-btn" type="button">Clear</button>
+      </div>
+
+      <hr class="section-rule">
+      </div>
+      </div>
+      <div id="overlayTabPanel" class="widget-tab-panel" role="tabpanel" aria-labelledby="tabOverlayBtn"></div>
+      <div id="typeTabPanel" class="widget-tab-panel" role="tabpanel" aria-labelledby="tabTypeBtn"></div>
+    </div>
+  </div>
+
+  <div class="widget overlay-widget" id="overlayWidget">
+    <div class="widget-header" id="overlayWidgetDragHandle" title="Click to expand / collapse · Drag to move">
+      <span class="widget-title">
+        Overlay Shapes
+        <svg class="chevron-icon" width="13" height="8" viewBox="0 0 13 9" fill="none" aria-hidden="true">
+          <path d="M1 7L6.5 1.5L12 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+      </span>
+    </div>
+
+    <div class="widget-body-wrap">
+      <div class="widget-body">
+        <div>
+          <div class="lbl">Shape Overlays</div>
+          <div class="field-hint">Layer circles or rectangles above the base weave, each with its own woven stripe recipe.</div>
+        </div>
+        <div id="overlayList" class="overlay-list"></div>
+        <div class="action-row">
+          <button id="addCircleOverlayBtn" class="action-btn" type="button">add circle</button>
+          <button id="addRectOverlayBtn" class="action-btn" type="button">add rectangle</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="widget type-widget" id="typeWidget">
+    <div class="widget-header" id="typeWidgetDragHandle" title="Click to expand / collapse · Drag to move">
+      <span class="widget-title">
+        Type Overlays
+        <svg class="chevron-icon" width="13" height="8" viewBox="0 0 13 9" fill="none" aria-hidden="true">
+          <path d="M1 7L6.5 1.5L12 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+      </span>
+    </div>
+
+    <div class="widget-body-wrap">
+      <div class="widget-body">
+        <div>
+          <div class="lbl">Type Overlays</div>
+          <div class="field-hint">Place modular grid text over the weave and color it with its own woven stripe recipe.</div>
+        </div>
+        <div id="typeOverlayList" class="overlay-list"></div>
+        <div class="action-row">
+          <button id="addTypeOverlayBtn" class="action-btn" type="button">add type</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const DEFAULT_PALETTE = ['#cfd6df', '#b4b4b4', '#ece1a2', '#6b8500', '#238337'];
+const POSTER_PALETTE = ['#f4d10b', '#ff3d32', '#1b8fe0', '#1f1a17', '#f0f0f0', '#6a7380'];
+const PIXEL_FONT = {
+  'A': ['01110', '10001', '10001', '11111', '10001', '10001', '10001'],
+  'B': ['11110', '10001', '10001', '11110', '10001', '10001', '11110'],
+  'C': ['01111', '10000', '10000', '10000', '10000', '10000', '01111'],
+  'D': ['11110', '10001', '10001', '10001', '10001', '10001', '11110'],
+  'E': ['11111', '10000', '10000', '11110', '10000', '10000', '11111'],
+  'F': ['11111', '10000', '10000', '11110', '10000', '10000', '10000'],
+  'G': ['01111', '10000', '10000', '10011', '10001', '10001', '01110'],
+  'H': ['10001', '10001', '10001', '11111', '10001', '10001', '10001'],
+  'I': ['11111', '00100', '00100', '00100', '00100', '00100', '11111'],
+  'J': ['00111', '00010', '00010', '00010', '00010', '10010', '01100'],
+  'K': ['10001', '10010', '10100', '11000', '10100', '10010', '10001'],
+  'L': ['10000', '10000', '10000', '10000', '10000', '10000', '11111'],
+  'M': ['10001', '11011', '10101', '10101', '10001', '10001', '10001'],
+  'N': ['10001', '11001', '10101', '10011', '10001', '10001', '10001'],
+  'O': ['01110', '10001', '10001', '10001', '10001', '10001', '01110'],
+  'P': ['11110', '10001', '10001', '11110', '10000', '10000', '10000'],
+  'Q': ['01110', '10001', '10001', '10001', '10101', '10010', '01101'],
+  'R': ['11110', '10001', '10001', '11110', '10100', '10010', '10001'],
+  'S': ['01111', '10000', '10000', '01110', '00001', '00001', '11110'],
+  'T': ['11111', '00100', '00100', '00100', '00100', '00100', '00100'],
+  'U': ['10001', '10001', '10001', '10001', '10001', '10001', '01110'],
+  'V': ['10001', '10001', '10001', '10001', '10001', '01010', '00100'],
+  'W': ['10001', '10001', '10001', '10101', '10101', '10101', '01010'],
+  'X': ['10001', '10001', '01010', '00100', '01010', '10001', '10001'],
+  'Y': ['10001', '10001', '01010', '00100', '00100', '00100', '00100'],
+  'Z': ['11111', '00001', '00010', '00100', '01000', '10000', '11111'],
+  '0': ['01110', '10001', '10011', '10101', '11001', '10001', '01110'],
+  '1': ['00100', '01100', '00100', '00100', '00100', '00100', '01110'],
+  '2': ['01110', '10001', '00001', '00010', '00100', '01000', '11111'],
+  '3': ['11110', '00001', '00001', '01110', '00001', '00001', '11110'],
+  '4': ['00010', '00110', '01010', '10010', '11111', '00010', '00010'],
+  '5': ['11111', '10000', '10000', '11110', '00001', '00001', '11110'],
+  '6': ['01110', '10000', '10000', '11110', '10001', '10001', '01110'],
+  '7': ['11111', '00001', '00010', '00100', '01000', '01000', '01000'],
+  '8': ['01110', '10001', '10001', '01110', '10001', '10001', '01110'],
+  '9': ['01110', '10001', '10001', '01111', '00001', '00001', '01110'],
+  '!': ['00100', '00100', '00100', '00100', '00100', '00000', '00100'],
+  '?': ['01110', '10001', '00001', '00010', '00100', '00000', '00100'],
+  '.': ['00000', '00000', '00000', '00000', '00000', '00000', '00100'],
+  ',': ['00000', '00000', '00000', '00000', '00000', '00100', '01000'],
+  '\'': ['00100', '00100', '00010', '00000', '00000', '00000', '00000'],
+  '-': ['00000', '00000', '00000', '01110', '00000', '00000', '00000'],
+  '&': ['01100', '10010', '10100', '01000', '10101', '10010', '01101']
+};
+const GLYPH_WIDTH = 5;
+const GLYPH_HEIGHT = 7;
+const SPACE_WIDTH = 4;
+const S = {
+  rows: 70,
+  cols: 70,
+  cellWidth: 24,
+  cellHeight: 24,
+  background: '#ececec',
+  weaveMode: 'checker',
+  rowStripes: [
+    { color: DEFAULT_PALETTE[1], size: 2 },
+    { color: DEFAULT_PALETTE[2], size: 1 },
+    { color: DEFAULT_PALETTE[3], size: 1 }
+  ],
+  colStripes: [
+    { color: DEFAULT_PALETTE[0], size: 2 },
+    { color: DEFAULT_PALETTE[1], size: 1 },
+    { color: DEFAULT_PALETTE[3], size: 1 }
+  ],
+  rowBandWeights: [96],
+  colBandWeights: [96],
+  rowBandSizes: [96],
+  colBandSizes: [96],
+  rowBandScales: [1],
+  colBandScales: [1],
+  edgeSquish: { top: 0, right: 0, bottom: 0, left: 0 },
+  cells: [],
+  overlays: [],
+  textOverlays: []
+};
+
+const refs = {
+  canvas: document.getElementById('loomCanvas'),
+  panel: document.getElementById('rightPanel'),
+  previewShell: document.querySelector('.preview-shell'),
+  tabWeaveBtn: document.getElementById('tabWeaveBtn'),
+  tabOverlayBtn: document.getElementById('tabOverlayBtn'),
+  tabTypeBtn: document.getElementById('tabTypeBtn'),
+  weaveTabPanel: document.getElementById('weaveTabPanel'),
+  overlayTabPanel: document.getElementById('overlayTabPanel'),
+  typeTabPanel: document.getElementById('typeTabPanel'),
+  weaveModeSelect: document.getElementById('weaveModeSelect'),
+  rowStripeEditor: document.getElementById('rowStripeEditor'),
+  colStripeEditor: document.getElementById('colStripeEditor'),
+  rowStripeSummary: document.getElementById('rowStripeSummary'),
+  colStripeSummary: document.getElementById('colStripeSummary'),
+  addRowStripeBtn: document.getElementById('addRowStripeBtn'),
+  addColStripeBtn: document.getElementById('addColStripeBtn'),
+  overlayList: document.getElementById('overlayList'),
+  addCircleOverlayBtn: document.getElementById('addCircleOverlayBtn'),
+  addRectOverlayBtn: document.getElementById('addRectOverlayBtn'),
+  typeOverlayList: document.getElementById('typeOverlayList'),
+  addTypeOverlayBtn: document.getElementById('addTypeOverlayBtn'),
+  backgroundInput: document.getElementById('backgroundInput'),
+  rowsInput: document.getElementById('rowsInput'),
+  rowsValue: document.getElementById('rowsValue'),
+  colsInput: document.getElementById('colsInput'),
+  colsValue: document.getElementById('colsValue'),
+  squishTopHandle: document.getElementById('squishTopHandle'),
+  squishRightHandle: document.getElementById('squishRightHandle'),
+  squishBottomHandle: document.getElementById('squishBottomHandle'),
+  squishLeftHandle: document.getElementById('squishLeftHandle'),
+  canvasResizeHandle: document.getElementById('canvasResizeHandle'),
+  exportRes: document.getElementById('exportRes')
+};
+
+let geometryCache = null;
+let activeSquishDrag = null;
+let activeCanvasResizeDrag = null;
+let activeStripeDrag = null;
+let activeOverlayDrag = null;
+let activeTextOverlayDrag = null;
+let activeControlTab = 'weave';
+let overlayIdCounter = 1;
+let textOverlayIdCounter = 1;
+let hasAppliedInitialCanvasSize = false;
+
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function hexToRgb(hex) {
+  const normalized = hex.replace('#', '');
+  const value = normalized.length === 3
+    ? normalized.split('').map(char => char + char).join('')
+    : normalized;
+  const int = Number.parseInt(value, 16);
+  return {
+    r: (int >> 16) & 255,
+    g: (int >> 8) & 255,
+    b: int & 255
+  };
+}
+
+function mixHexColors(colorA, colorB, weightB) {
+  const a = hexToRgb(colorA);
+  const b = hexToRgb(colorB);
+  const weight = clamp(weightB, 0, 1);
+  const mix = channel => Math.round(a[channel] * (1 - weight) + b[channel] * weight);
+  return `rgb(${mix('r')}, ${mix('g')}, ${mix('b')})`;
+}
+
+function readableInk(color) {
+  const { r, g, b } = hexToRgb(color);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.65 ? 'rgba(17, 17, 17, 0.88)' : 'rgba(255, 255, 255, 0.92)';
+}
+
+function applyStripeTheme(row, color) {
+  row.style.setProperty('--stripe-shell', mixHexColors(color, '#ffffff', 0.16));
+  row.style.setProperty('--stripe-track', mixHexColors(color, '#ffffff', 0.5));
+  row.style.setProperty('--stripe-bubble', mixHexColors(color, '#ffffff', 0.36));
+  row.style.setProperty('--stripe-outline', mixHexColors(color, '#000000', 0.22));
+  row.style.setProperty('--stripe-ink', readableInk(color));
+}
+
+function divideTotal(total, parts) {
+  const safeParts = Math.max(1, Math.min(total, parts));
+  const base = Math.floor(total / safeParts);
+  const remainder = total % safeParts;
+  return Array.from({ length: safeParts }, (_, index) => base + (index < remainder ? 1 : 0));
+}
+
+function cloneGrid(rows, cols, source) {
+  const grid = Array.from({ length: rows }, () => Array(cols).fill(-1));
+  if (!source) return grid;
+  const copyRows = Math.min(rows, source.length);
+  const copyCols = Math.min(cols, source[0] ? source[0].length : 0);
+  for (let row = 0; row < copyRows; row += 1) {
+    for (let col = 0; col < copyCols; col += 1) {
+      grid[row][col] = source[row][col];
+    }
+  }
+  return grid;
+}
+
+function stripeBandCountLabel(program) {
+  return program.length + (program.length === 1 ? ' band' : ' bands');
+}
+
+function refreshGeneratedPattern() {
+  S.cells = generateWeavePattern(false);
+}
+
+function cloneStripeProgram(program) {
+  return program.map(stripe => ({ color: stripe.color, size: stripe.size }));
+}
+
+function glyphRowsForChar(char) {
+  return PIXEL_FONT[char] || PIXEL_FONT['?'];
+}
+
+function normalizeTextLines(text) {
+  return String(text || '').toUpperCase().split('\n');
+}
+
+function drawPixelLine(pixels, x0, y0, x1, y1) {
+  let x = x0;
+  let y = y0;
+  const dx = Math.abs(x1 - x0);
+  const sx = x0 < x1 ? 1 : -1;
+  const dy = -Math.abs(y1 - y0);
+  const sy = y0 < y1 ? 1 : -1;
+  let error = dx + dy;
+
+  while (true) {
+    pixels.add(`${x},${y}`);
+    if (x === x1 && y === y1) break;
+    const twiceError = 2 * error;
+    if (twiceError >= dy) {
+      error += dy;
+      x += sx;
+    }
+    if (twiceError <= dx) {
+      error += dx;
+      y += sy;
+    }
+  }
+}
+
+function glyphAdvance(scale) {
+  return Math.max(1, scale) + 1;
+}
+
+function typeStrokeSize(scale) {
+  return clamp(Math.round(scale * 0.75), 1, 4);
+}
+
+function strokePadding(size) {
+  return {
+    before: Math.floor((size - 1) / 2),
+    after: Math.ceil((size - 1) / 2)
+  };
+}
+
+function glyphWidthUnits(scale) {
+  return (GLYPH_WIDTH - 1) * scale + 1;
+}
+
+function glyphHeightUnits(scale) {
+  return (GLYPH_HEIGHT - 1) * scale + 1;
+}
+
+function lineHeightUnits(scale) {
+  return glyphHeightUnits(scale) + scale + 1;
+}
+
+function lineWidthUnits(line, scale) {
+  if (!line.length) return 0;
+  let width = 0;
+  for (let index = 0; index < line.length; index += 1) {
+    width += line[index] === ' ' ? Math.max(1, SPACE_WIDTH * scale - (scale - 1)) : glyphWidthUnits(scale);
+    if (index < line.length - 1) width += glyphAdvance(scale);
+  }
+  return width;
+}
+
+function textOverlayMetrics(overlay) {
+  const lines = normalizeTextLines(overlay.text);
+  const basePixels = new Set();
+  let widthUnits = 0;
+  const scale = Math.max(1, overlay.scale);
+  const strokeSize = typeStrokeSize(scale);
+  const padding = strokePadding(strokeSize);
+
+  lines.forEach((line, lineIndex) => {
+    let cursorX = 0;
+    widthUnits = Math.max(widthUnits, lineWidthUnits(line, scale));
+    for (let index = 0; index < line.length; index += 1) {
+      const char = line[index];
+      if (char === ' ') {
+        cursorX += Math.max(1, SPACE_WIDTH * scale - (scale - 1));
+      } else {
+        const rows = glyphRowsForChar(char);
+        for (let row = 0; row < rows.length; row += 1) {
+          for (let col = 0; col < rows[row].length; col += 1) {
+            if (rows[row][col] === '1') {
+              const x = cursorX + col * scale;
+              const y = lineIndex * lineHeightUnits(scale) + row * scale;
+              basePixels.add(`${x},${y}`);
+              if (col < rows[row].length - 1 && rows[row][col + 1] === '1') {
+                drawPixelLine(basePixels, x, y, cursorX + (col + 1) * scale, y);
+              }
+              if (row < rows.length - 1 && rows[row + 1][col] === '1') {
+                drawPixelLine(basePixels, x, y, x, lineIndex * lineHeightUnits(scale) + (row + 1) * scale);
+              }
+              if (row < rows.length - 1 && col < rows[row].length - 1 && rows[row + 1][col + 1] === '1') {
+                drawPixelLine(
+                  basePixels,
+                  x,
+                  y,
+                  cursorX + (col + 1) * scale,
+                  lineIndex * lineHeightUnits(scale) + (row + 1) * scale
+                );
+              }
+              if (row < rows.length - 1 && col > 0 && rows[row + 1][col - 1] === '1') {
+                drawPixelLine(
+                  basePixels,
+                  x,
+                  y,
+                  cursorX + (col - 1) * scale,
+                  lineIndex * lineHeightUnits(scale) + (row + 1) * scale
+                );
+              }
+            }
+          }
+        }
+        cursorX += glyphWidthUnits(scale);
+      }
+      if (index < line.length - 1) cursorX += glyphAdvance(scale);
+    }
+  });
+
+  const pixels = new Set();
+  const widthPad = padding.before + padding.after;
+  const heightPad = padding.before + padding.after;
+  basePixels.forEach(point => {
+    const [rawX, rawY] = point.split(',').map(Number);
+    for (let dx = -padding.before; dx <= padding.after; dx += 1) {
+      for (let dy = -padding.before; dy <= padding.after; dy += 1) {
+        pixels.add(`${rawX + dx + padding.before},${rawY + dy + padding.before}`);
+      }
+    }
+  });
+
+  const heightUnits = lines.length
+    ? glyphHeightUnits(scale) + (lines.length - 1) * lineHeightUnits(scale) + heightPad
+    : glyphHeightUnits(scale);
+
+  return {
+    lines,
+    pixels,
+    widthUnits: Math.max(1, widthUnits + widthPad),
+    heightUnits
+  };
+}
+
+function textOverlaySpan(overlay) {
+  const metrics = textOverlayMetrics(overlay);
+  return {
+    metrics,
+    widthCells: Math.max(1, metrics.widthUnits),
+    heightCells: Math.max(1, metrics.heightUnits)
+  };
+}
+
+function createTextOverlay(overrides = {}) {
+  const defaults = {
+    text: 'TYPE',
+    row: 8,
+    col: 8,
+    scale: 2,
+    weaveMode: 'checker',
+    rowStripes: [
+      { color: '#f7f0df', size: 2 },
+      { color: '#fffaf1', size: 1 },
+      { color: '#f7f0df', size: 2 }
+    ],
+    colStripes: [
+      { color: '#efe6d2', size: 1 },
+      { color: '#fffdf8', size: 1 },
+      { color: '#efe6d2', size: 1 }
+    ]
+  };
+  const config = { ...defaults, ...overrides };
+  return {
+    id: `text-${textOverlayIdCounter++}`,
+    text: config.text,
+    row: config.row,
+    col: config.col,
+    scale: config.scale,
+    weaveMode: config.weaveMode,
+    rowStripes: cloneStripeProgram(config.rowStripes),
+    colStripes: cloneStripeProgram(config.colStripes)
+  };
+}
+
+function createOverlay(shape = 'rect', overrides = {}) {
+  const defaults = shape === 'ellipse'
+    ? {
+        x: 0.5,
+        y: 0.24,
+        width: 0.28,
+        height: 0.28,
+        weaveMode: 'checker',
+        rowStripes: [
+          { color: '#ff2238', size: 2 },
+          { color: '#ffc2d4', size: 1 },
+          { color: '#ff2238', size: 2 }
+        ],
+        colStripes: [
+          { color: '#a9001d', size: 1 },
+          { color: '#ffd5df', size: 1 },
+          { color: '#a9001d', size: 1 }
+        ]
+      }
+    : {
+        x: 0.5,
+        y: 0.72,
+        width: 0.26,
+        height: 0.38,
+        weaveMode: 'checker',
+        rowStripes: [
+          { color: '#0b88a4', size: 2 },
+          { color: '#bdd7f1', size: 1 },
+          { color: '#0b88a4', size: 2 }
+        ],
+        colStripes: [
+          { color: '#0a5b75', size: 1 },
+          { color: '#d4e4f6', size: 1 },
+          { color: '#0a5b75', size: 1 }
+        ]
+      };
+  const config = { ...defaults, ...overrides };
+  return {
+    id: `overlay-${overlayIdCounter++}`,
+    shape: config.shape || shape,
+    x: config.x,
+    y: config.y,
+    width: config.width,
+    height: config.height,
+    weaveMode: config.weaveMode,
+    rowStripes: cloneStripeProgram(config.rowStripes),
+    colStripes: cloneStripeProgram(config.colStripes)
+  };
+}
+
+function addOverlay(shape) {
+  S.overlays.push(createOverlay(shape));
+  renderOverlayControls();
+  renderCanvas();
+}
+
+function duplicateOverlay(id) {
+  const overlayIndex = S.overlays.findIndex(item => item.id === id);
+  if (overlayIndex < 0) return;
+
+  const source = S.overlays[overlayIndex];
+  const duplicate = createOverlay(source.shape, {
+    x: source.x,
+    y: source.y,
+    width: source.width,
+    height: source.height,
+    weaveMode: source.weaveMode,
+    rowStripes: source.rowStripes,
+    colStripes: source.colStripes
+  });
+
+  const geometry = buildGeometry();
+  const anchor = overlayAnchorCell(source, geometry);
+  const nextRow = anchor.row < S.rows - 1 ? anchor.row + 1 : Math.max(0, anchor.row - 1);
+  const nextCol = anchor.col < S.cols - 1 ? anchor.col + 1 : Math.max(0, anchor.col - 1);
+  setOverlayCenterToCell(duplicate, nextRow, nextCol, geometry);
+
+  S.overlays.splice(overlayIndex + 1, 0, duplicate);
+  renderOverlayControls();
+  renderCanvas();
+}
+
+function removeOverlay(id) {
+  S.overlays = S.overlays.filter(overlay => overlay.id !== id);
+  if (activeOverlayDrag?.id === id) activeOverlayDrag = null;
+  renderOverlayControls();
+  renderCanvas();
+}
+
+function addOverlayStripe(id, axis) {
+  const overlay = S.overlays.find(item => item.id === id);
+  if (!overlay) return;
+  const key = axis === 'row' ? 'rowStripes' : 'colStripes';
+  const fallback = overlay[key][overlay[key].length - 1]?.color || DEFAULT_PALETTE[0];
+  overlay[key].push({ color: fallback, size: 2 });
+  renderOverlayControls();
+  renderCanvas();
+}
+
+function removeOverlayStripe(id, axis, index) {
+  const overlay = S.overlays.find(item => item.id === id);
+  if (!overlay) return;
+  const key = axis === 'row' ? 'rowStripes' : 'colStripes';
+  if (overlay[key].length <= 1) return;
+  overlay[key].splice(index, 1);
+  renderOverlayControls();
+  renderCanvas();
+}
+
+function addTextOverlay() {
+  const overlay = createTextOverlay();
+  clampTextOverlayToBounds(overlay);
+  S.textOverlays.push(overlay);
+  renderTypeOverlayControls();
+  renderCanvas();
+}
+
+function duplicateTextOverlay(id) {
+  const overlayIndex = S.textOverlays.findIndex(item => item.id === id);
+  if (overlayIndex < 0) return;
+
+  const source = S.textOverlays[overlayIndex];
+  const duplicate = createTextOverlay({
+    text: source.text,
+    row: source.row + 1,
+    col: source.col + 1,
+    scale: source.scale,
+    weaveMode: source.weaveMode,
+    rowStripes: source.rowStripes,
+    colStripes: source.colStripes
+  });
+  clampTextOverlayToBounds(duplicate);
+
+  S.textOverlays.splice(overlayIndex + 1, 0, duplicate);
+  renderTypeOverlayControls();
+  renderCanvas();
+}
+
+function removeTextOverlay(id) {
+  S.textOverlays = S.textOverlays.filter(overlay => overlay.id !== id);
+  if (activeTextOverlayDrag?.id === id) activeTextOverlayDrag = null;
+  renderTypeOverlayControls();
+  renderCanvas();
+}
+
+function addTextOverlayStripe(id, axis) {
+  const overlay = S.textOverlays.find(item => item.id === id);
+  if (!overlay) return;
+  const key = axis === 'row' ? 'rowStripes' : 'colStripes';
+  const fallback = overlay[key][overlay[key].length - 1]?.color || DEFAULT_PALETTE[0];
+  overlay[key].push({ color: fallback, size: 2 });
+  renderTypeOverlayControls();
+  renderCanvas();
+}
+
+function removeTextOverlayStripe(id, axis, index) {
+  const overlay = S.textOverlays.find(item => item.id === id);
+  if (!overlay) return;
+  const key = axis === 'row' ? 'rowStripes' : 'colStripes';
+  if (overlay[key].length <= 1) return;
+  overlay[key].splice(index, 1);
+  renderTypeOverlayControls();
+  renderCanvas();
+}
+
+function addStripe(axis) {
+  const key = axis === 'row' ? 'rowStripes' : 'colStripes';
+  S[key].push({ color: S.background, size: 2 });
+  refreshGeneratedPattern();
+  renderWeaveControls();
+  renderCanvas();
+}
+
+function removeStripe(axis, index) {
+  const key = axis === 'row' ? 'rowStripes' : 'colStripes';
+  if (S[key].length <= 1) return;
+  S[key].splice(index, 1);
+  refreshGeneratedPattern();
+  renderWeaveControls();
+  renderCanvas();
+}
+
+function reorderStripe(axis, fromIndex, toIndex) {
+  const key = axis === 'row' ? 'rowStripes' : 'colStripes';
+  if (fromIndex === toIndex || fromIndex < 0 || toIndex < 0) return;
+  const [stripe] = S[key].splice(fromIndex, 1);
+  S[key].splice(toIndex, 0, stripe);
+  refreshGeneratedPattern();
+  renderWeaveControls();
+  renderCanvas();
+}
+
+function stripeAtIndex(program, index) {
+  const total = program.reduce((sum, stripe) => sum + Math.max(1, stripe.size), 0) || 1;
+  let cursor = ((index % total) + total) % total;
+  for (const stripe of program) {
+    const span = Math.max(1, stripe.size);
+    if (cursor < span) return stripe;
+    cursor -= span;
+  }
+  return program[program.length - 1];
+}
+
+function weaveColorForPrograms(config, row, col) {
+  const rowColor = stripeAtIndex(config.rowStripes, row).color;
+  const colColor = stripeAtIndex(config.colStripes, col).color;
+  if (config.weaveMode === 'row') return rowColor;
+  if (config.weaveMode === 'col') return colColor;
+  return (row + col) % 2 === 0 ? rowColor : colColor;
+}
+
+function weaveCellColor(row, col) {
+  return weaveColorForPrograms(S, row, col);
+}
+
+function generateWeavePattern(withNoise = false) {
+  const next = Array.from({ length: S.rows }, () => Array(S.cols).fill(null));
+  const colorPool = Array.from(new Set([
+    S.background,
+    ...S.rowStripes.map(stripe => stripe.color),
+    ...S.colStripes.map(stripe => stripe.color)
+  ]));
+  for (let row = 0; row < S.rows; row += 1) {
+    for (let col = 0; col < S.cols; col += 1) {
+      let color = weaveCellColor(row, col);
+      if (withNoise && Math.random() < 0.08) {
+        color = colorPool[Math.floor(Math.random() * colorPool.length)];
+      }
+      next[row][col] = color;
+    }
+  }
+  return next;
+}
+
+function loadPosterPreset() {
+  S.background = '#ececec';
+  S.weaveMode = 'checker';
+  S.rowStripes = [
+    { color: POSTER_PALETTE[1], size: 2 },
+    { color: POSTER_PALETTE[3], size: 2 },
+    { color: POSTER_PALETTE[1], size: 1 },
+    { color: POSTER_PALETTE[0], size: 1 },
+    { color: POSTER_PALETTE[3], size: 1 },
+    { color: POSTER_PALETTE[1], size: 2 }
+  ];
+  S.colStripes = [
+    { color: POSTER_PALETTE[2], size: 2 },
+    { color: POSTER_PALETTE[3], size: 1 },
+    { color: POSTER_PALETTE[2], size: 1 },
+    { color: POSTER_PALETTE[0], size: 2 },
+    { color: POSTER_PALETTE[3], size: 1 },
+    { color: POSTER_PALETTE[2], size: 1 }
+  ];
+  S.cells = generateWeavePattern(false);
+}
+
+function loadOverlayExample() {
+  S.overlays = [
+    createOverlay('ellipse', {
+      x: 0.18,
+      y: 0.18,
+      width: 0.31,
+      height: 0.31,
+      rowStripes: [
+        { color: '#ff142b', size: 2 },
+        { color: '#f7b3c6', size: 1 },
+        { color: '#ff142b', size: 2 }
+      ],
+      colStripes: [
+        { color: '#950019', size: 1 },
+        { color: '#ffd17d', size: 1 },
+        { color: '#950019', size: 1 }
+      ]
+    }),
+    createOverlay('ellipse', {
+      x: 0.5,
+      y: 0.18,
+      width: 0.31,
+      height: 0.31,
+      rowStripes: [
+        { color: '#ff142b', size: 2 },
+        { color: '#f7b3c6', size: 1 },
+        { color: '#ff142b', size: 2 }
+      ],
+      colStripes: [
+        { color: '#950019', size: 1 },
+        { color: '#ffd17d', size: 1 },
+        { color: '#950019', size: 1 }
+      ]
+    }),
+    createOverlay('ellipse', {
+      x: 0.82,
+      y: 0.18,
+      width: 0.31,
+      height: 0.31,
+      rowStripes: [
+        { color: '#ff142b', size: 2 },
+        { color: '#f7b3c6', size: 1 },
+        { color: '#ff142b', size: 2 }
+      ],
+      colStripes: [
+        { color: '#950019', size: 1 },
+        { color: '#ffd17d', size: 1 },
+        { color: '#950019', size: 1 }
+      ]
+    }),
+    createOverlay('rect', {
+      x: 0.18,
+      y: 0.7,
+      width: 0.3,
+      height: 0.46,
+      rowStripes: [
+        { color: '#ff1d34', size: 2 },
+        { color: '#f9d4de', size: 1 },
+        { color: '#ff1d34', size: 2 }
+      ],
+      colStripes: [
+        { color: '#ff8ca4', size: 1 },
+        { color: '#fff2f5', size: 1 },
+        { color: '#ff8ca4', size: 1 }
+      ]
+    }),
+    createOverlay('rect', {
+      x: 0.5,
+      y: 0.7,
+      width: 0.3,
+      height: 0.46,
+      rowStripes: [
+        { color: '#d4ff00', size: 2 },
+        { color: '#fff6af', size: 1 },
+        { color: '#d4ff00', size: 2 }
+      ],
+      colStripes: [
+        { color: '#f2e56b', size: 1 },
+        { color: '#fffbe3', size: 1 },
+        { color: '#f2e56b', size: 1 }
+      ]
+    }),
+    createOverlay('rect', {
+      x: 0.82,
+      y: 0.7,
+      width: 0.3,
+      height: 0.46,
+      rowStripes: [
+        { color: '#0b88a4', size: 2 },
+        { color: '#bdd7f1', size: 1 },
+        { color: '#0b88a4', size: 2 }
+      ],
+      colStripes: [
+        { color: '#0a5b75', size: 1 },
+        { color: '#d4e4f6', size: 1 },
+        { color: '#0a5b75', size: 1 }
+      ]
+    })
+  ];
+  renderOverlayControls();
+  renderCanvas();
+}
+
+function defaultBandScales(count, axis) {
+  return Array.from({ length: count }, (_, index) => {
+    const offset = index - (count - 1) / 2;
+    const value = axis === 'row'
+      ? 1.15 + offset * -0.14
+      : 0.95 + offset * 0.18;
+    return Number(value.toFixed(2));
+  });
+}
+
+function sizesFromWeights(total, weights) {
+  const safeWeights = weights.map(weight => Math.max(1, weight));
+  const sizes = Array(safeWeights.length).fill(1);
+  let remaining = total - safeWeights.length;
+  if (remaining <= 0) return sizes;
+
+  const totalWeight = safeWeights.reduce((sum, weight) => sum + weight, 0);
+  const raw = safeWeights.map(weight => remaining * weight / totalWeight);
+  const whole = raw.map(value => Math.floor(value));
+  const fractions = raw.map((value, index) => ({
+    index,
+    fraction: value - whole[index]
+  })).sort((a, b) => b.fraction - a.fraction);
+
+  for (let index = 0; index < sizes.length; index += 1) {
+    sizes[index] += whole[index];
+  }
+  remaining -= whole.reduce((sum, value) => sum + value, 0);
+
+  for (let index = 0; index < remaining; index += 1) {
+    sizes[fractions[index].index] += 1;
+  }
+
+  return sizes;
+}
+
+function syncBandSizesFromWeights(axis) {
+  if (axis === 'row') {
+    S.rowBandSizes = sizesFromWeights(S.rows, S.rowBandWeights);
+  } else {
+    S.colBandSizes = sizesFromWeights(S.cols, S.colBandWeights);
+  }
+}
+
+function setBandCount(axis, requestedCount) {
+  const total = axis === 'row' ? S.rows : S.cols;
+  const count = clamp(requestedCount, 1, Math.min(8, total));
+  const weightsKey = axis === 'row' ? 'rowBandWeights' : 'colBandWeights';
+  const scalesKey = axis === 'row' ? 'rowBandScales' : 'colBandScales';
+  const nextWeights = S[weightsKey].slice(0, count);
+  const nextScales = S[scalesKey].slice(0, count);
+  const defaults = defaultBandScales(count, axis);
+
+  while (nextWeights.length < count) nextWeights.push(1);
+  while (nextScales.length < count) nextScales.push(defaults[nextScales.length]);
+
+  S[weightsKey] = nextWeights;
+  S[scalesKey] = nextScales.map(value => Number(value.toFixed(2)));
+  syncBandSizesFromWeights(axis);
+}
+
+function resetSections() {
+  S.rowBandWeights = [S.rows];
+  S.colBandWeights = [S.cols];
+  S.rowBandSizes = [S.rows];
+  S.colBandSizes = [S.cols];
+  S.rowBandScales = [1];
+  S.colBandScales = [1];
+}
+
+function resizeGrid(nextRows, nextCols) {
+  S.rows = clamp(nextRows, 4, 96);
+  S.cols = clamp(nextCols, 4, 96);
+  refs.rowsInput.value = S.rows;
+  refs.colsInput.value = S.cols;
+  resetSections();
+  refreshGeneratedPattern();
+  S.textOverlays.forEach(clampTextOverlayToBounds);
+}
+
+function bandIndexFromOffset(index, sizes) {
+  let cursor = 0;
+  for (let band = 0; band < sizes.length; band += 1) {
+    cursor += sizes[band];
+    if (index < cursor) return band;
+  }
+  return sizes.length - 1;
+}
+
+function buildBandData(total, sizes, scales) {
+  const bandByIndex = [];
+  const scaleByIndex = [];
+  const boundaries = [0];
+  let cursor = 0;
+  for (let band = 0; band < sizes.length; band += 1) {
+    for (let count = 0; count < sizes[band]; count += 1) {
+      if (bandByIndex.length >= total) break;
+      bandByIndex.push(band);
+      scaleByIndex.push(scales[band]);
+      cursor += 1;
+    }
+    boundaries.push(cursor);
+  }
+  while (bandByIndex.length < total) {
+    bandByIndex.push(sizes.length - 1);
+    scaleByIndex.push(scales[scales.length - 1]);
+  }
+  boundaries[boundaries.length - 1] = total;
+  return { bandByIndex, scaleByIndex, boundaries };
+}
+
+function applyEdgeSquishToSizes(sizes, startSquish, endSquish) {
+  if (!sizes.length) return sizes;
+  const total = sizes.reduce((sum, value) => sum + value, 0);
+  const influenceSpan = 0.35;
+  const warped = sizes.map((size, index) => {
+    const t = (index + 0.5) / sizes.length;
+    const startInfluence = Math.max(0, 1 - t / influenceSpan);
+    const endInfluence = Math.max(0, 1 - (1 - t) / influenceSpan);
+    const factor = Math.max(0.12, (1 - startSquish * startInfluence) * (1 - endSquish * endInfluence));
+    return size * factor;
+  });
+  const warpedTotal = warped.reduce((sum, value) => sum + value, 0) || 1;
+  const normalize = total / warpedTotal;
+  return warped.map(value => value * normalize);
+}
+
+function buildGeometry() {
+  const rowBands = buildBandData(S.rows, S.rowBandSizes, S.rowBandScales);
+  const colBands = buildBandData(S.cols, S.colBandSizes, S.colBandScales);
+  const rowHeights = applyEdgeSquishToSizes(
+    rowBands.scaleByIndex.map(scale => S.cellHeight * scale),
+    S.edgeSquish.top,
+    S.edgeSquish.bottom
+  );
+  const colWidths = applyEdgeSquishToSizes(
+    colBands.scaleByIndex.map(scale => S.cellWidth * scale),
+    S.edgeSquish.left,
+    S.edgeSquish.right
+  );
+  const rowOffsets = [];
+  const colOffsets = [];
+  let width = 0;
+  let height = 0;
+
+  for (let col = 0; col < S.cols; col += 1) {
+    colOffsets[col] = width;
+    width += colWidths[col];
+  }
+  for (let row = 0; row < S.rows; row += 1) {
+    rowOffsets[row] = height;
+    height += rowHeights[row];
+  }
+
+  geometryCache = { rowBands, colBands, rowHeights, colWidths, rowOffsets, colOffsets, width, height };
+  return geometryCache;
+}
+
+function fillRoundedRect(ctx, x, y, width, height, radius) {
+  const r = Math.min(radius, width / 2, height / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + width, y, x + width, y + height, r);
+  ctx.arcTo(x + width, y + height, x, y + height, r);
+  ctx.arcTo(x, y + height, x, y, r);
+  ctx.arcTo(x, y, x + width, y, r);
+  ctx.closePath();
+  ctx.fill();
+}
+
+function overlayBounds(overlay, geometry) {
+  const width = overlay.width * geometry.width;
+  const height = overlay.height * geometry.height;
+  return {
+    left: overlay.x * geometry.width - width / 2,
+    top: overlay.y * geometry.height - height / 2,
+    width,
+    height
+  };
+}
+
+function patternPointFromClient(clientX, clientY) {
+  const geometry = geometryCache || buildGeometry();
+  const rect = refs.canvas.getBoundingClientRect();
+  if (!rect.width || !rect.height) return null;
+  const x = (clientX - rect.left) / rect.width * geometry.width;
+  const y = (clientY - rect.top) / rect.height * geometry.height;
+  return { x, y, geometry, rect };
+}
+
+function overlayMapForHitTest(overlay, geometry) {
+  return {
+    overlay,
+    bounds: overlayBounds(overlay, geometry)
+  };
+}
+
+function topOverlayAtPoint(clientX, clientY) {
+  const point = patternPointFromClient(clientX, clientY);
+  if (!point) return null;
+  const { x, y, geometry } = point;
+  if (x < 0 || y < 0 || x > geometry.width || y > geometry.height) return null;
+  for (let index = S.overlays.length - 1; index >= 0; index -= 1) {
+    const overlay = S.overlays[index];
+    if (overlayContainsPoint(overlayMapForHitTest(overlay, geometry), x, y)) {
+      return overlay;
+    }
+  }
+  return null;
+}
+
+function topTextOverlayAtPoint(clientX, clientY) {
+  const cell = findCellAtPoint(clientX, clientY);
+  if (!cell) return null;
+  for (let index = S.textOverlays.length - 1; index >= 0; index -= 1) {
+    const overlay = S.textOverlays[index];
+    const { widthCells, heightCells } = textOverlaySpan(overlay);
+    if (
+      cell.row >= overlay.row
+      && cell.row < overlay.row + heightCells
+      && cell.col >= overlay.col
+      && cell.col < overlay.col + widthCells
+    ) {
+      return overlay;
+    }
+  }
+  return null;
+}
+
+function overlayAnchorCell(overlay, geometry = buildGeometry()) {
+  let bestRow = 0;
+  let bestCol = 0;
+  let bestRowDistance = Infinity;
+  let bestColDistance = Infinity;
+  const targetX = overlay.x * geometry.width;
+  const targetY = overlay.y * geometry.height;
+
+  for (let row = 0; row < S.rows; row += 1) {
+    const centerY = geometry.rowOffsets[row] + geometry.rowHeights[row] / 2;
+    const distance = Math.abs(centerY - targetY);
+    if (distance < bestRowDistance) {
+      bestRowDistance = distance;
+      bestRow = row;
+    }
+  }
+
+  for (let col = 0; col < S.cols; col += 1) {
+    const centerX = geometry.colOffsets[col] + geometry.colWidths[col] / 2;
+    const distance = Math.abs(centerX - targetX);
+    if (distance < bestColDistance) {
+      bestColDistance = distance;
+      bestCol = col;
+    }
+  }
+
+  return { row: bestRow, col: bestCol };
+}
+
+function clampOverlayToBounds(overlay) {
+  overlay.x = clamp(overlay.x, overlay.width / 2, 1 - overlay.width / 2);
+  overlay.y = clamp(overlay.y, overlay.height / 2, 1 - overlay.height / 2);
+}
+
+function clampTextOverlayToBounds(overlay) {
+  const { widthCells, heightCells } = textOverlaySpan(overlay);
+  overlay.col = clamp(overlay.col, 0, Math.max(0, S.cols - widthCells));
+  overlay.row = clamp(overlay.row, 0, Math.max(0, S.rows - heightCells));
+}
+
+function setOverlayCenterToCell(overlay, row, col, geometry = buildGeometry()) {
+  const safeRow = clamp(row, 0, S.rows - 1);
+  const safeCol = clamp(col, 0, S.cols - 1);
+  const centerX = geometry.colOffsets[safeCol] + geometry.colWidths[safeCol] / 2;
+  const centerY = geometry.rowOffsets[safeRow] + geometry.rowHeights[safeRow] / 2;
+  overlay.x = clamp(centerX / geometry.width, overlay.width / 2, 1 - overlay.width / 2);
+  overlay.y = clamp(centerY / geometry.height, overlay.height / 2, 1 - overlay.height / 2);
+}
+
+function prepareTextOverlayMaps() {
+  return S.textOverlays.map(overlay => {
+    const { metrics, widthCells, heightCells } = textOverlaySpan(overlay);
+    return {
+      overlay,
+      widthCells,
+      heightCells,
+      pixels: metrics.pixels,
+      widthUnits: metrics.widthUnits,
+      heightUnits: metrics.heightUnits
+    };
+  });
+}
+
+function prepareOverlayMaps(geometry) {
+  return S.overlays.map(overlay => {
+    const bounds = overlayBounds(overlay, geometry);
+    const rowMap = Array(S.rows).fill(-1);
+    const colMap = Array(S.cols).fill(-1);
+    let localRow = 0;
+    let localCol = 0;
+
+    for (let row = 0; row < S.rows; row += 1) {
+      const centerY = geometry.rowOffsets[row] + geometry.rowHeights[row] / 2;
+      if (centerY >= bounds.top && centerY <= bounds.top + bounds.height) {
+        rowMap[row] = localRow;
+        localRow += 1;
+      }
+    }
+
+    for (let col = 0; col < S.cols; col += 1) {
+      const centerX = geometry.colOffsets[col] + geometry.colWidths[col] / 2;
+      if (centerX >= bounds.left && centerX <= bounds.left + bounds.width) {
+        colMap[col] = localCol;
+        localCol += 1;
+      }
+    }
+
+    return { overlay, bounds, rowMap, colMap };
+  });
+}
+
+function overlayContainsPoint(overlayMap, x, y) {
+  const { overlay, bounds } = overlayMap;
+  if (overlay.shape === 'rect') {
+    return x >= bounds.left && x <= bounds.left + bounds.width
+      && y >= bounds.top && y <= bounds.top + bounds.height;
+  }
+  const rx = bounds.width / 2 || 1;
+  const ry = bounds.height / 2 || 1;
+  const cx = bounds.left + rx;
+  const cy = bounds.top + ry;
+  const dx = (x - cx) / rx;
+  const dy = (y - cy) / ry;
+  return dx * dx + dy * dy <= 1;
+}
+
+function overlayColorAtCell(overlayMap, row, col, geometry) {
+  const localRow = overlayMap.rowMap[row];
+  const localCol = overlayMap.colMap[col];
+  if (localRow < 0 || localCol < 0) return null;
+
+  const x = geometry.colOffsets[col] + geometry.colWidths[col] / 2;
+  const y = geometry.rowOffsets[row] + geometry.rowHeights[row] / 2;
+  if (!overlayContainsPoint(overlayMap, x, y)) return null;
+
+  return weaveColorForPrograms(overlayMap.overlay, localRow, localCol);
+}
+
+function textOverlayColorAtCell(textMap, row, col) {
+  const localRow = row - textMap.overlay.row;
+  const localCol = col - textMap.overlay.col;
+  if (localRow < 0 || localCol < 0) return null;
+  if (localRow >= textMap.heightCells || localCol >= textMap.widthCells) return null;
+
+  if (!textMap.pixels.has(`${localCol},${localRow}`)) return null;
+
+  return weaveColorForPrograms(textMap.overlay, localRow, localCol);
+}
+
+function resolvedCellColor(row, col, geometry, overlayMaps, textOverlayMaps) {
+  let color = S.cells[row][col];
+  for (const overlayMap of overlayMaps) {
+    const overlayColor = overlayColorAtCell(overlayMap, row, col, geometry);
+    if (overlayColor) color = overlayColor;
+  }
+  for (const textMap of textOverlayMaps) {
+    const textColor = textOverlayColorAtCell(textMap, row, col);
+    if (textColor) color = textColor;
+  }
+  return color;
+}
+
+function motifSegments(row, col, geometry, overlayMaps, textOverlayMaps) {
+  const color = resolvedCellColor(row, col, geometry, overlayMaps, textOverlayMaps);
+  if (!color) return [];
+  const x = geometry.colOffsets[col];
+  const y = geometry.rowOffsets[row];
+  const width = geometry.colWidths[col];
+  const height = geometry.rowHeights[row];
+  return [{
+    x,
+    y,
+    width,
+    height,
+    radius: 0,
+    color
+  }];
+}
+
+function drawPattern(ctx, geometry) {
+  const overlayMaps = prepareOverlayMaps(geometry);
+  const textOverlayMaps = prepareTextOverlayMaps();
+  ctx.fillStyle = S.background;
+  ctx.fillRect(0, 0, geometry.width, geometry.height);
+
+  ctx.strokeStyle = 'rgba(0,0,0,0.045)';
+  ctx.lineWidth = Math.max(0.75, Math.min(S.cellWidth, S.cellHeight) * 0.035);
+  for (let index = 1; index < S.rowBandSizes.length; index += 1) {
+    const row = geometry.rowBands.boundaries[index];
+    const y = geometry.rowOffsets[row] || geometry.height;
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(geometry.width, y);
+    ctx.stroke();
+  }
+  for (let index = 1; index < S.colBandSizes.length; index += 1) {
+    const col = geometry.colBands.boundaries[index];
+    const x = geometry.colOffsets[col] || geometry.width;
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, geometry.height);
+    ctx.stroke();
+  }
+
+  for (let row = 0; row < S.rows; row += 1) {
+    for (let col = 0; col < S.cols; col += 1) {
+      const segments = motifSegments(row, col, geometry, overlayMaps, textOverlayMaps);
+      for (const segment of segments) {
+        ctx.fillStyle = segment.color;
+        fillRoundedRect(ctx, segment.x, segment.y, segment.width, segment.height, segment.radius);
+      }
+    }
+  }
+}
+
+function renderCanvas() {
+  const geometry = buildGeometry();
+  const dpr = window.devicePixelRatio || 1;
+  const maxWidth = refs.panel.clientWidth - 120;
+  const maxHeight = refs.panel.clientHeight - 120;
+  const scale = Math.min(maxWidth / geometry.width, maxHeight / geometry.height, 1);
+  let cssWidth = Math.max(120, geometry.width * scale);
+  let cssHeight = Math.max(120, geometry.height * scale);
+  if (!hasAppliedInitialCanvasSize) {
+    const initialMaxSize = 770;
+    const initialScale = Math.min(initialMaxSize / cssWidth, initialMaxSize / cssHeight, 1);
+    cssWidth *= initialScale;
+    cssHeight *= initialScale;
+    hasAppliedInitialCanvasSize = true;
+  }
+  const canvas = refs.canvas;
+  canvas.style.width = cssWidth + 'px';
+  canvas.style.height = cssHeight + 'px';
+  canvas.width = Math.round(cssWidth * dpr);
+  canvas.height = Math.round(cssHeight * dpr);
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr * scale, 0, 0, dpr * scale, 0, 0);
+  ctx.clearRect(0, 0, geometry.width, geometry.height);
+  drawPattern(ctx, geometry);
+}
+
+function renderWeaveControls() {
+  refs.weaveModeSelect.value = S.weaveMode;
+
+  renderStripeEditor('row');
+  renderStripeEditor('col');
+}
+
+function renderOverlayControls() {
+  refs.overlayList.innerHTML = '';
+  const geometry = buildGeometry();
+
+  if (!S.overlays.length) {
+    const empty = document.createElement('div');
+    empty.className = 'overlay-empty field-hint';
+    empty.textContent = 'No overlays yet. Add a circle or rectangle to start stacking woven shapes above the base.';
+    refs.overlayList.appendChild(empty);
+    return;
+  }
+
+  S.overlays.forEach((overlay, index) => {
+    const card = document.createElement('div');
+    card.className = 'overlay-card';
+
+    const header = document.createElement('div');
+    header.className = 'overlay-card-header';
+
+    const title = document.createElement('div');
+    title.className = 'overlay-card-title';
+    title.textContent = `${overlay.shape === 'rect' ? 'rectangle' : 'circle'} ${index + 1}`;
+
+    const actions = document.createElement('div');
+    actions.className = 'overlay-card-actions';
+
+    const duplicateBtn = document.createElement('button');
+    duplicateBtn.type = 'button';
+    duplicateBtn.className = 'overlay-duplicate-btn';
+    duplicateBtn.textContent = '+';
+    duplicateBtn.title = 'Duplicate shape';
+    duplicateBtn.setAttribute('aria-label', 'Duplicate shape');
+    duplicateBtn.addEventListener('click', () => duplicateOverlay(overlay.id));
+
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'action-btn overlay-remove-btn';
+    removeBtn.textContent = '×';
+    removeBtn.setAttribute('aria-label', 'Remove shape');
+    removeBtn.title = 'Remove shape';
+    removeBtn.addEventListener('click', () => removeOverlay(overlay.id));
+
+    actions.appendChild(duplicateBtn);
+    actions.appendChild(removeBtn);
+    header.appendChild(title);
+    header.appendChild(actions);
+    card.appendChild(header);
+
+    const selectGrid = document.createElement('div');
+    selectGrid.className = 'grid-2';
+
+    const shapeField = document.createElement('div');
+    shapeField.innerHTML = '<div class="lbl">shape</div>';
+    const shapeSelect = document.createElement('select');
+    shapeSelect.className = 'res-select';
+    shapeSelect.innerHTML = `
+      <option value="ellipse">circle</option>
+      <option value="rect">rectangle</option>
+    `;
+    shapeSelect.value = overlay.shape;
+    shapeSelect.addEventListener('change', event => {
+      overlay.shape = event.target.value;
+      renderOverlayControls();
+      renderCanvas();
+    });
+    shapeField.appendChild(shapeSelect);
+
+    const weaveField = document.createElement('div');
+    weaveField.innerHTML = '<div class="lbl">weave mode</div>';
+    const weaveSelect = document.createElement('select');
+    weaveSelect.className = 'res-select';
+    weaveSelect.innerHTML = `
+      <option value="checker">over-under</option>
+      <option value="row">rows on top</option>
+      <option value="col">columns on top</option>
+    `;
+    weaveSelect.value = overlay.weaveMode;
+    weaveSelect.addEventListener('change', event => {
+      overlay.weaveMode = event.target.value;
+      renderCanvas();
+    });
+    weaveField.appendChild(weaveSelect);
+
+    selectGrid.appendChild(shapeField);
+    selectGrid.appendChild(weaveField);
+    card.appendChild(selectGrid);
+
+    const anchor = overlayAnchorCell(overlay, geometry);
+    const dragHint = document.createElement('div');
+    dragHint.className = 'field-hint overlay-drag-hint';
+    dragHint.textContent = `Drag on canvas to reposition. Snaps to grid at row ${anchor.row + 1}, column ${anchor.col + 1}.`;
+    card.appendChild(dragHint);
+
+    const sliderGrid = document.createElement('div');
+    sliderGrid.className = 'overlay-size-grid';
+    const sliderConfigs = [
+      { key: 'width', label: 'width', min: 8, max: 100, step: 1, suffix: '%' },
+      { key: 'height', label: 'height', min: 8, max: 100, step: 1, suffix: '%' }
+    ];
+
+    sliderConfigs.forEach(config => {
+      const field = document.createElement('div');
+      field.className = 'overlay-slider-field';
+
+      const label = document.createElement('div');
+      label.className = 'lbl with-value';
+      const labelName = document.createElement('span');
+      labelName.textContent = config.label;
+      const labelValue = document.createElement('span');
+      labelValue.textContent = `${Math.round(overlay[config.key] * 100)}${config.suffix}`;
+      label.appendChild(labelName);
+      label.appendChild(labelValue);
+
+      const slider = document.createElement('input');
+      slider.type = 'range';
+      slider.className = 'pill-slider';
+      slider.min = String(config.min);
+      slider.max = String(config.max);
+      slider.step = String(config.step);
+      slider.value = String(Math.round(overlay[config.key] * 100));
+      slider.addEventListener('input', event => {
+        overlay[config.key] = Number(event.target.value) / 100;
+        clampOverlayToBounds(overlay);
+        labelValue.textContent = `${Math.round(overlay[config.key] * 100)}${config.suffix}`;
+        renderCanvas();
+      });
+
+      field.appendChild(label);
+      field.appendChild(slider);
+      sliderGrid.appendChild(field);
+    });
+
+    card.appendChild(sliderGrid);
+
+    ['row', 'col'].forEach(axis => {
+      const key = axis === 'row' ? 'rowStripes' : 'colStripes';
+      const group = document.createElement('div');
+      group.className = 'stripe-program-group overlay-stripe-group';
+
+      const groupLabel = document.createElement('div');
+      groupLabel.className = 'lbl with-value';
+      groupLabel.innerHTML = `<span>${axis === 'row' ? 'row weave' : 'column weave'}</span>`;
+      const summaryGroup = document.createElement('span');
+      summaryGroup.className = 'inline-action-group';
+      summaryGroup.innerHTML = `<span>${stripeBandCountLabel(overlay[key])}</span>`;
+      const addBtn = document.createElement('button');
+      addBtn.type = 'button';
+      addBtn.className = 'icon-circle-btn';
+      addBtn.textContent = '+';
+      addBtn.setAttribute('aria-label', axis === 'row' ? 'Add row stripe' : 'Add column stripe');
+      addBtn.title = axis === 'row' ? 'Add row stripe' : 'Add column stripe';
+      addBtn.addEventListener('click', () => addOverlayStripe(overlay.id, axis));
+      summaryGroup.appendChild(addBtn);
+      groupLabel.appendChild(summaryGroup);
+      group.appendChild(groupLabel);
+
+      const editor = document.createElement('div');
+      editor.className = 'stripe-editor';
+
+      overlay[key].forEach((stripe, stripeIndex) => {
+        const row = document.createElement('div');
+        row.className = 'stripe-row';
+        applyStripeTheme(row, stripe.color);
+
+        const badge = document.createElement('div');
+        badge.className = 'stripe-index-badge';
+        badge.textContent = String(stripeIndex + 1);
+
+        const sliderWrap = document.createElement('div');
+        sliderWrap.className = 'stripe-slider-wrap';
+
+        const slider = document.createElement('input');
+        slider.type = 'range';
+        slider.className = 'pill-slider stripe-thickness-slider';
+        slider.min = '1';
+        slider.max = '24';
+        slider.step = '1';
+        slider.value = String(stripe.size);
+        slider.addEventListener('input', event => {
+          stripe.size = Number(event.target.value);
+          renderCanvas();
+        });
+        sliderWrap.appendChild(slider);
+
+        const controls = document.createElement('div');
+        controls.className = 'stripe-row-controls';
+
+        const colorLabel = document.createElement('label');
+        colorLabel.className = 'stripe-color-circle';
+        const colorInput = document.createElement('input');
+        colorInput.type = 'color';
+        colorInput.className = 'stripe-color-input';
+        colorInput.value = stripe.color;
+        colorInput.addEventListener('input', event => {
+          stripe.color = event.target.value;
+          applyStripeTheme(row, stripe.color);
+          renderCanvas();
+        });
+        colorLabel.appendChild(colorInput);
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.type = 'button';
+        deleteBtn.className = 'stripe-remove-btn';
+        deleteBtn.textContent = '×';
+        deleteBtn.disabled = overlay[key].length <= 1;
+        deleteBtn.addEventListener('click', () => removeOverlayStripe(overlay.id, axis, stripeIndex));
+
+        controls.appendChild(colorLabel);
+        controls.appendChild(deleteBtn);
+
+        row.appendChild(badge);
+        row.appendChild(sliderWrap);
+        row.appendChild(controls);
+        editor.appendChild(row);
+      });
+
+      group.appendChild(editor);
+
+      card.appendChild(group);
+    });
+
+    refs.overlayList.appendChild(card);
+  });
+}
+
+function renderTypeOverlayControls() {
+  refs.typeOverlayList.innerHTML = '';
+
+  if (!S.textOverlays.length) {
+    const empty = document.createElement('div');
+    empty.className = 'overlay-empty field-hint';
+    empty.textContent = 'No type overlays yet. Add modular text, then drag it directly on the canvas to place it.';
+    refs.typeOverlayList.appendChild(empty);
+    return;
+  }
+
+  S.textOverlays.forEach((overlay, index) => {
+    const card = document.createElement('div');
+    card.className = 'overlay-card';
+
+    const header = document.createElement('div');
+    header.className = 'overlay-card-header';
+
+    const title = document.createElement('div');
+    title.className = 'overlay-card-title';
+    title.textContent = `type ${index + 1}`;
+
+    const actions = document.createElement('div');
+    actions.className = 'overlay-card-actions';
+
+    const duplicateBtn = document.createElement('button');
+    duplicateBtn.type = 'button';
+    duplicateBtn.className = 'overlay-duplicate-btn';
+    duplicateBtn.textContent = '+';
+    duplicateBtn.title = 'Duplicate type';
+    duplicateBtn.setAttribute('aria-label', 'Duplicate type');
+    duplicateBtn.addEventListener('click', () => duplicateTextOverlay(overlay.id));
+
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'action-btn overlay-remove-btn';
+    removeBtn.textContent = '×';
+    removeBtn.setAttribute('aria-label', 'Remove type');
+    removeBtn.title = 'Remove type';
+    removeBtn.addEventListener('click', () => removeTextOverlay(overlay.id));
+
+    actions.appendChild(duplicateBtn);
+    actions.appendChild(removeBtn);
+    header.appendChild(title);
+    header.appendChild(actions);
+    card.appendChild(header);
+
+    const textField = document.createElement('div');
+    textField.className = 'type-text-field';
+    textField.innerHTML = '<div class="lbl">text</div>';
+    const textInput = document.createElement('textarea');
+    textInput.className = 'text-overlay-input';
+    textInput.rows = 4;
+    textInput.spellcheck = false;
+    textInput.value = overlay.text;
+    textInput.placeholder = 'TYPE HERE';
+    textInput.addEventListener('input', event => {
+      overlay.text = event.target.value;
+      clampTextOverlayToBounds(overlay);
+      renderCanvas();
+    });
+    textField.appendChild(textInput);
+    card.appendChild(textField);
+
+    const settingsGrid = document.createElement('div');
+    settingsGrid.className = 'grid-2';
+
+    const weaveField = document.createElement('div');
+    weaveField.innerHTML = '<div class="lbl">weave mode</div>';
+    const weaveSelect = document.createElement('select');
+    weaveSelect.className = 'res-select';
+    weaveSelect.innerHTML = `
+      <option value="checker">over-under</option>
+      <option value="row">rows on top</option>
+      <option value="col">columns on top</option>
+    `;
+    weaveSelect.value = overlay.weaveMode;
+    weaveSelect.addEventListener('change', event => {
+      overlay.weaveMode = event.target.value;
+      renderCanvas();
+    });
+    weaveField.appendChild(weaveSelect);
+
+    const scaleField = document.createElement('div');
+    scaleField.className = 'overlay-slider-field';
+    const scaleLabel = document.createElement('div');
+    scaleLabel.className = 'lbl with-value';
+    scaleLabel.innerHTML = `<span>type scale</span><span>${overlay.scale}x</span>`;
+    const scaleSlider = document.createElement('input');
+    scaleSlider.type = 'range';
+    scaleSlider.className = 'pill-slider';
+    scaleSlider.min = '1';
+    scaleSlider.max = '6';
+    scaleSlider.step = '1';
+    scaleSlider.value = String(overlay.scale);
+    scaleSlider.addEventListener('input', event => {
+      overlay.scale = Number(event.target.value);
+      clampTextOverlayToBounds(overlay);
+      scaleLabel.querySelector('span:last-child').textContent = `${overlay.scale}x`;
+      dragHint.textContent = `Drag on canvas to reposition. Snaps to grid at row ${overlay.row + 1}, column ${overlay.col + 1}.`;
+      renderCanvas();
+    });
+    scaleField.appendChild(scaleLabel);
+    scaleField.appendChild(scaleSlider);
+
+    settingsGrid.appendChild(weaveField);
+    settingsGrid.appendChild(scaleField);
+    card.appendChild(settingsGrid);
+
+    const dragHint = document.createElement('div');
+    dragHint.className = 'field-hint overlay-drag-hint';
+    dragHint.textContent = `Drag on canvas to reposition. Snaps to grid at row ${overlay.row + 1}, column ${overlay.col + 1}.`;
+    card.appendChild(dragHint);
+
+    ['row', 'col'].forEach(axis => {
+      const key = axis === 'row' ? 'rowStripes' : 'colStripes';
+      const group = document.createElement('div');
+      group.className = 'stripe-program-group overlay-stripe-group';
+
+      const groupLabel = document.createElement('div');
+      groupLabel.className = 'lbl with-value';
+      groupLabel.innerHTML = `<span>${axis === 'row' ? 'row weave' : 'column weave'}</span>`;
+      const summaryGroup = document.createElement('span');
+      summaryGroup.className = 'inline-action-group';
+      summaryGroup.innerHTML = `<span>${stripeBandCountLabel(overlay[key])}</span>`;
+      const addBtn = document.createElement('button');
+      addBtn.type = 'button';
+      addBtn.className = 'icon-circle-btn';
+      addBtn.textContent = '+';
+      addBtn.setAttribute('aria-label', axis === 'row' ? 'Add row stripe' : 'Add column stripe');
+      addBtn.title = axis === 'row' ? 'Add row stripe' : 'Add column stripe';
+      addBtn.addEventListener('click', () => addTextOverlayStripe(overlay.id, axis));
+      summaryGroup.appendChild(addBtn);
+      groupLabel.appendChild(summaryGroup);
+      group.appendChild(groupLabel);
+
+      const editor = document.createElement('div');
+      editor.className = 'stripe-editor';
+
+      overlay[key].forEach((stripe, stripeIndex) => {
+        const row = document.createElement('div');
+        row.className = 'stripe-row';
+        applyStripeTheme(row, stripe.color);
+
+        const badge = document.createElement('div');
+        badge.className = 'stripe-index-badge';
+        badge.textContent = String(stripeIndex + 1);
+
+        const sliderWrap = document.createElement('div');
+        sliderWrap.className = 'stripe-slider-wrap';
+
+        const slider = document.createElement('input');
+        slider.type = 'range';
+        slider.className = 'pill-slider stripe-thickness-slider';
+        slider.min = '1';
+        slider.max = '24';
+        slider.step = '1';
+        slider.value = String(stripe.size);
+        slider.addEventListener('input', event => {
+          stripe.size = Number(event.target.value);
+          renderCanvas();
+        });
+        sliderWrap.appendChild(slider);
+
+        const controls = document.createElement('div');
+        controls.className = 'stripe-row-controls';
+
+        const colorLabel = document.createElement('label');
+        colorLabel.className = 'stripe-color-circle';
+        const colorInput = document.createElement('input');
+        colorInput.type = 'color';
+        colorInput.className = 'stripe-color-input';
+        colorInput.value = stripe.color;
+        colorInput.addEventListener('input', event => {
+          stripe.color = event.target.value;
+          applyStripeTheme(row, stripe.color);
+          renderCanvas();
+        });
+        colorLabel.appendChild(colorInput);
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.type = 'button';
+        deleteBtn.className = 'stripe-remove-btn';
+        deleteBtn.textContent = '×';
+        deleteBtn.disabled = overlay[key].length <= 1;
+        deleteBtn.addEventListener('click', () => removeTextOverlayStripe(overlay.id, axis, stripeIndex));
+
+        controls.appendChild(colorLabel);
+        controls.appendChild(deleteBtn);
+
+        row.appendChild(badge);
+        row.appendChild(sliderWrap);
+        row.appendChild(controls);
+        editor.appendChild(row);
+      });
+
+      group.appendChild(editor);
+
+      card.appendChild(group);
+    });
+
+    refs.typeOverlayList.appendChild(card);
+  });
+}
+
+function renderStripeEditor(axis) {
+  const editor = axis === 'row' ? refs.rowStripeEditor : refs.colStripeEditor;
+  const summary = axis === 'row' ? refs.rowStripeSummary : refs.colStripeSummary;
+  const program = axis === 'row' ? S.rowStripes : S.colStripes;
+
+  summary.textContent = stripeBandCountLabel(program);
+  editor.innerHTML = '';
+
+  program.forEach((stripe, index) => {
+    const row = document.createElement('div');
+    row.className = 'stripe-row';
+    row.dataset.axis = axis;
+    row.dataset.index = String(index);
+    applyStripeTheme(row, stripe.color);
+    row.addEventListener('dragover', handleStripeDragOver);
+    row.addEventListener('drop', handleStripeDrop);
+
+    const rowHeader = document.createElement('div');
+    rowHeader.className = 'stripe-row-header';
+
+    const dragHandle = document.createElement('button');
+    dragHandle.type = 'button';
+    dragHandle.className = 'stripe-drag-handle';
+    dragHandle.textContent = String(index + 1);
+    dragHandle.draggable = true;
+    dragHandle.dataset.axis = axis;
+    dragHandle.dataset.index = String(index);
+    dragHandle.title = 'Drag to reorder stripe';
+    dragHandle.addEventListener('dragstart', handleStripeDragStart);
+    dragHandle.addEventListener('dragend', handleStripeDragEnd);
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.type = 'button';
+    deleteBtn.className = 'stripe-remove-btn';
+    deleteBtn.textContent = '×';
+    deleteBtn.title = 'Remove stripe';
+    deleteBtn.disabled = program.length <= 1;
+    deleteBtn.addEventListener('click', () => removeStripe(axis, index));
+
+    rowHeader.appendChild(dragHandle);
+
+    const sliderWrap = document.createElement('div');
+    sliderWrap.className = 'stripe-slider-wrap';
+
+    const slider = document.createElement('input');
+    slider.type = 'range';
+    slider.className = 'pill-slider stripe-thickness-slider';
+    slider.min = '1';
+    slider.max = '24';
+    slider.step = '1';
+    slider.value = String(stripe.size);
+    slider.addEventListener('input', event => {
+      stripe.size = Number(event.target.value);
+      refreshGeneratedPattern();
+      renderCanvas();
+    });
+
+    const controls = document.createElement('div');
+    controls.className = 'stripe-row-controls';
+
+    const colorLabel = document.createElement('label');
+    colorLabel.className = 'stripe-color-circle';
+    colorLabel.title = 'Choose stripe color';
+
+    const colorInput = document.createElement('input');
+    colorInput.type = 'color';
+    colorInput.className = 'stripe-color-input';
+    colorInput.value = stripe.color;
+    colorInput.addEventListener('input', event => {
+      stripe.color = event.target.value;
+      applyStripeTheme(row, stripe.color);
+      refreshGeneratedPattern();
+      renderCanvas();
+    });
+
+    colorLabel.appendChild(colorInput);
+    controls.appendChild(colorLabel);
+    controls.appendChild(deleteBtn);
+
+    rowHeader.appendChild(controls);
+    sliderWrap.appendChild(slider);
+
+    row.appendChild(rowHeader);
+    row.appendChild(sliderWrap);
+    editor.appendChild(row);
+  });
+}
+
+function syncControls() {
+  refs.rowsInput.value = S.rows;
+  updateValueSlider(refs.rowsInput, refs.rowsValue, S.rows);
+  refs.colsInput.value = S.cols;
+  updateValueSlider(refs.colsInput, refs.colsValue, S.cols);
+  refs.backgroundInput.value = S.background;
+  refs.weaveModeSelect.value = S.weaveMode;
+}
+
+function updateValueSlider(input, readout, value) {
+  const numericValue = Number(value);
+  const min = Number(input.min) || 0;
+  const max = Number(input.max) || 100;
+  const range = Math.max(1, max - min);
+  const percent = (numericValue - min) / range;
+  input.parentElement.style.setProperty('--slider-percent', String(percent));
+  readout.textContent = String(numericValue);
+}
+
+function render() {
+  syncControls();
+  renderWeaveControls();
+  renderOverlayControls();
+  renderTypeOverlayControls();
+  renderControlTabs();
+  renderSquishHandles();
+  renderCanvas();
+}
+
+function renderControlTabs() {
+  const tabs = [
+    { id: 'weave', button: refs.tabWeaveBtn, panel: refs.weaveTabPanel },
+    { id: 'overlay', button: refs.tabOverlayBtn, panel: refs.overlayTabPanel },
+    { id: 'type', button: refs.tabTypeBtn, panel: refs.typeTabPanel }
+  ];
+
+  tabs.forEach(tab => {
+    const isActive = tab.id === activeControlTab;
+    tab.button.classList.toggle('active', isActive);
+    tab.button.setAttribute('aria-selected', String(isActive));
+    tab.panel.classList.toggle('active', isActive);
+  });
+}
+
+function setActiveControlTab(tabId) {
+  activeControlTab = tabId;
+  renderControlTabs();
+}
+
+function moveWidgetPanelContents(sourceWidgetId, targetPanel) {
+  const sourceWidget = document.getElementById(sourceWidgetId);
+  const sourceBody = sourceWidget?.querySelector('.widget-body');
+  if (!sourceBody || !targetPanel || targetPanel.childNodes.length) return;
+  const panelContent = document.createElement('div');
+  panelContent.className = 'weave-builder';
+  while (sourceBody.firstChild) {
+    panelContent.appendChild(sourceBody.firstChild);
+  }
+  targetPanel.appendChild(panelContent);
+  sourceWidget.remove();
+}
+
+function initControlTabs() {
+  moveWidgetPanelContents('overlayWidget', refs.overlayTabPanel);
+  moveWidgetPanelContents('typeWidget', refs.typeTabPanel);
+  refs.tabWeaveBtn.addEventListener('click', () => setActiveControlTab('weave'));
+  refs.tabOverlayBtn.addEventListener('click', () => setActiveControlTab('overlay'));
+  refs.tabTypeBtn.addEventListener('click', () => setActiveControlTab('type'));
+  renderControlTabs();
+}
+
+function handleStripeDragStart(event) {
+  activeStripeDrag = {
+    axis: event.currentTarget.dataset.axis,
+    index: Number(event.currentTarget.dataset.index)
+  };
+  event.currentTarget.closest('.stripe-row')?.classList.add('dragging');
+  if (event.dataTransfer) {
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData('text/plain', '');
+  }
+}
+
+function handleStripeDragOver(event) {
+  if (!activeStripeDrag) return;
+  if (activeStripeDrag.axis !== event.currentTarget.dataset.axis) return;
+  event.preventDefault();
+  event.currentTarget.classList.add('drag-over');
+}
+
+function handleStripeDrop(event) {
+  event.preventDefault();
+  if (!activeStripeDrag) return;
+  const axis = event.currentTarget.dataset.axis;
+  const targetIndex = Number(event.currentTarget.dataset.index);
+  if (activeStripeDrag.axis === axis) {
+    reorderStripe(axis, activeStripeDrag.index, targetIndex);
+  }
+}
+
+function handleStripeDragEnd() {
+  activeStripeDrag = null;
+  document.querySelectorAll('.stripe-row').forEach(node => {
+    node.classList.remove('dragging', 'drag-over');
+  });
+}
+
+function renderSquishHandles() {
+  const shellWidth = refs.previewShell.clientWidth || 0;
+  const shellHeight = refs.previewShell.clientHeight || 0;
+  const horizontalTravel = Math.max(40, shellWidth * 0.18);
+  const verticalTravel = Math.max(40, shellHeight * 0.18);
+
+  refs.squishLeftHandle.style.left = `${12 + horizontalTravel * S.edgeSquish.left}px`;
+  refs.squishRightHandle.style.right = `${12 + horizontalTravel * S.edgeSquish.right}px`;
+  refs.squishTopHandle.style.top = `${12 + verticalTravel * S.edgeSquish.top}px`;
+  refs.squishBottomHandle.style.bottom = `${12 + verticalTravel * S.edgeSquish.bottom}px`;
+
+  refs.squishLeftHandle.title = `Left squish ${Math.round(S.edgeSquish.left * 100)}%`;
+  refs.squishRightHandle.title = `Right squish ${Math.round(S.edgeSquish.right * 100)}%`;
+  refs.squishTopHandle.title = `Top squish ${Math.round(S.edgeSquish.top * 100)}%`;
+  refs.squishBottomHandle.title = `Bottom squish ${Math.round(S.edgeSquish.bottom * 100)}%`;
+}
+
+function startCanvasResizeDrag(event) {
+  event.preventDefault();
+  activeCanvasResizeDrag = {
+    startX: event.clientX,
+    startY: event.clientY,
+    startCellWidth: S.cellWidth,
+    startCellHeight: S.cellHeight
+  };
+  event.currentTarget.setPointerCapture?.(event.pointerId);
+}
+
+function startSquishDrag(event) {
+  event.preventDefault();
+  const edge = event.currentTarget.dataset.edge;
+  activeSquishDrag = {
+    edge,
+    startX: event.clientX,
+    startY: event.clientY,
+    startValue: S.edgeSquish[edge]
+  };
+  event.currentTarget.setPointerCapture?.(event.pointerId);
+}
+
+function findCellAtPoint(clientX, clientY) {
+  const point = patternPointFromClient(clientX, clientY);
+  if (!point) return null;
+  const { x, y, geometry } = point;
+  if (x < 0 || y < 0 || x > geometry.width || y > geometry.height) return null;
+
+  let col = -1;
+  let row = -1;
+
+  for (let index = 0; index < geometry.colOffsets.length; index += 1) {
+    const start = geometry.colOffsets[index];
+    const end = start + geometry.colWidths[index];
+    if (x >= start && x <= end) {
+      col = index;
+      break;
+    }
+  }
+  for (let index = 0; index < geometry.rowOffsets.length; index += 1) {
+    const start = geometry.rowOffsets[index];
+    const end = start + geometry.rowHeights[index];
+    if (y >= start && y <= end) {
+      row = index;
+      break;
+    }
+  }
+
+  return row >= 0 && col >= 0 ? { row, col } : null;
+}
+
+function updateCanvasCursor(clientX, clientY) {
+  if (activeOverlayDrag || activeTextOverlayDrag) {
+    refs.canvas.style.cursor = 'grabbing';
+    return;
+  }
+  refs.canvas.style.cursor = (topTextOverlayAtPoint(clientX, clientY) || topOverlayAtPoint(clientX, clientY)) ? 'grab' : 'default';
+}
+
+function startOverlayDrag(event) {
+  const cell = findCellAtPoint(event.clientX, event.clientY);
+  const textOverlay = topTextOverlayAtPoint(event.clientX, event.clientY);
+  if (textOverlay) {
+    activeTextOverlayDrag = {
+      id: textOverlay.id,
+      rowOffset: cell ? cell.row - textOverlay.row : 0,
+      colOffset: cell ? cell.col - textOverlay.col : 0
+    };
+  } else {
+    const overlay = topOverlayAtPoint(event.clientX, event.clientY);
+    if (!overlay) return;
+    const anchor = overlayAnchorCell(overlay);
+    activeOverlayDrag = {
+      id: overlay.id,
+      rowOffset: cell ? cell.row - anchor.row : 0,
+      colOffset: cell ? cell.col - anchor.col : 0
+    };
+  }
+  refs.canvas.style.cursor = 'grabbing';
+  refs.canvas.setPointerCapture?.(event.pointerId);
+  event.preventDefault();
+}
+
+function tapestryColorForCell(row, col, randomOffset = 0) {
+  const rowBand = bandIndexFromOffset(row, S.rowBandSizes);
+  const colBand = bandIndexFromOffset(col, S.colBandSizes);
+  const midRow = Math.floor(S.rows / 2);
+  const midCol = Math.floor(S.cols / 2);
+  const dr = Math.abs(row - midRow);
+  const dc = Math.abs(col - midCol);
+  const coarseA = (Math.floor(row / 2) + Math.floor(col / 3) + rowBand) % 6;
+  const coarseB = (Math.floor((dr + dc) / 2) + colBand) % 5;
+  const stripe = (row % (2 + (colBand % 3)) === 0) || (col % (2 + (rowBand % 3)) === 0);
+  const diamond = ((dr + dc + rowBand + colBand) % 6) < 2;
+  const corners = ((row % 5 === 0) && (col % 5 === 0));
+  const nested = (((row + col) % 8 === 0) || ((row - col + S.cols * 2) % 8 === 0));
+  const bandCore = (dr < S.rows * 0.12 || dc < S.cols * 0.12);
+  let color = 0;
+
+  if (bandCore) color = 3;
+  if (coarseA === 0 || coarseB === 0) color = 4;
+  if (diamond) color = 2;
+  if (stripe) color = 1;
+  if (nested) color = 5;
+  if (corners) color = 3;
+
+  return DEFAULT_PALETTE[(color + randomOffset) % DEFAULT_PALETTE.length];
+}
+
+function seedPattern() {
+  S.cells = generateWeavePattern(false);
+}
+
+function randomizePattern() {
+  S.cells = generateWeavePattern(true);
+}
+
+function clearPattern() {
+  S.cells = Array.from({ length: S.rows }, () => Array(S.cols).fill(null));
+}
+
+function renderSectionControls(axis) {
+  const controlsRef = axis === 'row' ? refs.rowSectionControls : refs.colSectionControls;
+  const sizes = axis === 'row' ? S.rowBandSizes : S.colBandSizes;
+  const scales = axis === 'row' ? S.rowBandScales : S.colBandScales;
+
+  controlsRef.innerHTML = '';
+  for (let index = 0; index < sizes.length; index += 1) {
+    const card = document.createElement('div');
+    card.className = 'section-card';
+
+    const title = document.createElement('div');
+    title.className = 'section-card-title';
+    title.textContent = axis + ' band ' + (index + 1);
+
+    const sizeReadout = document.createElement('div');
+    sizeReadout.className = 'section-readout';
+    sizeReadout.dataset.axis = axis;
+    sizeReadout.dataset.role = 'size';
+    sizeReadout.dataset.index = String(index);
+
+    const scaleWrap = document.createElement('div');
+    scaleWrap.className = 'section-slider-wrap';
+    scaleWrap.innerHTML = '<div class="section-slider-label"><span>pixel scale</span><span></span></div>';
+    const scaleValue = scaleWrap.querySelector('span:last-child');
+    scaleValue.dataset.axis = axis;
+    scaleValue.dataset.role = 'scale';
+    scaleValue.dataset.index = String(index);
+
+    const scaleSlider = document.createElement('input');
+    scaleSlider.type = 'range';
+    scaleSlider.className = 'pill-slider section-slider';
+    scaleSlider.min = '0.6';
+    scaleSlider.max = '1.6';
+    scaleSlider.step = '0.01';
+    scaleSlider.value = String(scales[index]);
+    scaleSlider.addEventListener('input', event => {
+      const next = Number(event.target.value);
+      if (axis === 'row') {
+        S.rowBandScales[index] = next;
+      } else {
+        S.colBandScales[index] = next;
+      }
+      updateSectionReadouts(axis);
+      renderCanvas();
+    });
+
+    card.appendChild(title);
+    card.appendChild(sizeReadout);
+    scaleWrap.appendChild(scaleSlider);
+    card.appendChild(scaleWrap);
+    controlsRef.appendChild(card);
+  }
+
+  updateSectionReadouts(axis);
+}
+
+function renderSectionPreview(axis) {
+  const preview = axis === 'row' ? refs.rowSectionPreview : refs.colSectionPreview;
+  const sizes = axis === 'row' ? S.rowBandSizes : S.colBandSizes;
+  const scales = axis === 'row' ? S.rowBandScales : S.colBandScales;
+  const total = sizes.reduce((sum, value) => sum + value, 0);
+  preview.innerHTML = '';
+  preview.dataset.axis = axis;
+
+  sizes.forEach((size, index) => {
+    const segment = document.createElement('div');
+    segment.className = 'section-preview-segment';
+    segment.style.flexGrow = String(size);
+    segment.style.background = DEFAULT_PALETTE[index % DEFAULT_PALETTE.length];
+    segment.title = `${axis} band ${index + 1}: ${size} ${axis === 'row' ? 'rows' : 'cols'}, ${scales[index].toFixed(2)}x`;
+
+    const label = document.createElement('span');
+    label.textContent = `${Math.round(size / total * 100)}%`;
+    segment.appendChild(label);
+    preview.appendChild(segment);
+
+    if (index < sizes.length - 1) {
+      const handle = document.createElement('button');
+      handle.type = 'button';
+      handle.className = 'section-preview-handle';
+      handle.dataset.axis = axis;
+      handle.dataset.index = String(index);
+      handle.title = 'Drag to resize adjacent sections';
+      handle.addEventListener('pointerdown', startSectionDrag);
+      handle.addEventListener('keydown', handleSectionBoundaryKeydown);
+      preview.appendChild(handle);
+    }
+  });
+}
+
+function updateSectionReadouts(axis) {
+  const sizes = axis === 'row' ? S.rowBandSizes : S.colBandSizes;
+  const scales = axis === 'row' ? S.rowBandScales : S.colBandScales;
+  const unitLabel = axis === 'row' ? 'rows' : 'cols';
+  const totalSize = sizes.reduce((sum, value) => sum + value, 0);
+
+  document.querySelectorAll(`[data-axis="${axis}"][data-role="size"]`).forEach((node, index) => {
+    node.textContent = `${sizes[index]} ${unitLabel} (${Math.round(sizes[index] / totalSize * 100)}%)`;
+  });
+  document.querySelectorAll(`[data-axis="${axis}"][data-role="scale"]`).forEach((node, index) => {
+    node.textContent = Number(scales[index]).toFixed(2) + 'x';
+  });
+  renderSectionPreview(axis);
+}
+
+function syncWeightsFromSizes(axis) {
+  if (axis === 'row') {
+    S.rowBandWeights = [...S.rowBandSizes];
+  } else {
+    S.colBandWeights = [...S.colBandSizes];
+  }
+}
+
+function resizeAdjacentBands(axis, index, delta) {
+  const sizes = axis === 'row' ? [...S.rowBandSizes] : [...S.colBandSizes];
+  const leftMin = 1;
+  const rightMin = 1;
+  const maxGrowRight = sizes[index + 1] - rightMin;
+  const maxGrowLeft = sizes[index] - leftMin;
+  const appliedDelta = Math.max(-maxGrowLeft, Math.min(maxGrowRight, delta));
+  if (!appliedDelta) return;
+
+  sizes[index] += appliedDelta;
+  sizes[index + 1] -= appliedDelta;
+
+  if (axis === 'row') {
+    S.rowBandSizes = sizes;
+  } else {
+    S.colBandSizes = sizes;
+  }
+  syncWeightsFromSizes(axis);
+}
+
+function applySectionBoundaryDelta(axis, index, delta) {
+  resizeAdjacentBands(axis, index, delta);
+  updateSectionReadouts(axis);
+  renderCanvas();
+}
+
+function startSectionDrag(event) {
+  event.preventDefault();
+  const handle = event.currentTarget;
+  const axis = handle.dataset.axis;
+  const index = Number(handle.dataset.index);
+  activeSectionDrag = {
+    axis,
+    index,
+    startX: event.clientX,
+    startY: event.clientY,
+    startSizes: axis === 'row' ? [...S.rowBandSizes] : [...S.colBandSizes]
+  };
+  handle.setPointerCapture?.(event.pointerId);
+}
+
+function handleSectionBoundaryKeydown(event) {
+  const handle = event.currentTarget;
+  const axis = handle.dataset.axis;
+  const index = Number(handle.dataset.index);
+  if (event.key === 'ArrowLeft') {
+    event.preventDefault();
+    applySectionBoundaryDelta(axis, index, -1);
+  }
+  if (event.key === 'ArrowRight') {
+    event.preventDefault();
+    applySectionBoundaryDelta(axis, index, 1);
+  }
+}
+
+function svgRect(x, y, width, height, radius, fill) {
+  return `<rect x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${width.toFixed(2)}" height="${height.toFixed(2)}" rx="${radius.toFixed(2)}" fill="${fill}"></rect>`;
+}
+
+function buildPatternSVG() {
+  const geometry = buildGeometry();
+  const overlayMaps = prepareOverlayMaps(geometry);
+  const textOverlayMaps = prepareTextOverlayMaps();
+  const parts = [
+    '<?xml version="1.0" encoding="UTF-8"?>',
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${geometry.width.toFixed(2)}" height="${geometry.height.toFixed(2)}" viewBox="0 0 ${geometry.width.toFixed(2)} ${geometry.height.toFixed(2)}">`,
+    `  <rect width="${geometry.width.toFixed(2)}" height="${geometry.height.toFixed(2)}" fill="${S.background}"></rect>`,
+    `  <g opacity="0.32" stroke="white" stroke-width="${Math.max(1, Math.min(S.cellWidth, S.cellHeight) * 0.06).toFixed(2)}">`
+  ];
+
+  for (let index = 1; index < S.rowBandSizes.length; index += 1) {
+    const row = geometry.rowBands.boundaries[index];
+    const y = geometry.rowOffsets[row] || geometry.height;
+    parts.push(`    <line x1="0" y1="${y.toFixed(2)}" x2="${geometry.width.toFixed(2)}" y2="${y.toFixed(2)}"></line>`);
+  }
+  for (let index = 1; index < S.colBandSizes.length; index += 1) {
+    const col = geometry.colBands.boundaries[index];
+    const x = geometry.colOffsets[col] || geometry.width;
+    parts.push(`    <line x1="${x.toFixed(2)}" y1="0" x2="${x.toFixed(2)}" y2="${geometry.height.toFixed(2)}"></line>`);
+  }
+  parts.push('  </g>');
+  parts.push('  <g>');
+
+  for (let row = 0; row < S.rows; row += 1) {
+    for (let col = 0; col < S.cols; col += 1) {
+      const segments = motifSegments(row, col, geometry, overlayMaps, textOverlayMaps);
+      for (const segment of segments) {
+        parts.push('    ' + svgRect(segment.x, segment.y, segment.width, segment.height, segment.radius, segment.color));
+      }
+    }
+  }
+
+  parts.push('  </g>');
+  parts.push('</svg>');
+  return parts.join('\n');
+}
+
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+
+function saveSVG() {
+  const blob = new Blob([buildPatternSVG()], { type: 'image/svg+xml' });
+  downloadBlob(blob, 'loom-pattern.svg');
+}
+
+function savePNG(width) {
+  const geometry = buildGeometry();
+  const scale = width / geometry.width;
+  const height = Math.round(geometry.height * scale);
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(scale, 0, 0, scale, 0, 0);
+  drawPattern(ctx, geometry);
+  canvas.toBlob(blob => {
+    if (blob) downloadBlob(blob, 'loom-pattern.png');
+  }, 'image/png');
+}
+
+function saveImage() {
+  const value = refs.exportRes.value;
+  if (value === 'svg') {
+    saveSVG();
+  } else {
+    savePNG(Number(value));
+  }
+}
+
+refs.backgroundInput.addEventListener('input', event => {
+  S.background = event.target.value;
+  renderCanvas();
+});
+
+refs.rowsInput.addEventListener('input', event => {
+  resizeGrid(Number(event.target.value), S.cols);
+  render();
+});
+
+refs.colsInput.addEventListener('input', event => {
+  resizeGrid(S.rows, Number(event.target.value));
+  render();
+});
+
+refs.weaveModeSelect.addEventListener('change', event => {
+  S.weaveMode = event.target.value;
+  refreshGeneratedPattern();
+  renderCanvas();
+});
+
+refs.addRowStripeBtn.addEventListener('click', () => addStripe('row'));
+refs.addColStripeBtn.addEventListener('click', () => addStripe('col'));
+refs.addCircleOverlayBtn.addEventListener('click', () => addOverlay('ellipse'));
+refs.addRectOverlayBtn.addEventListener('click', () => addOverlay('rect'));
+refs.addTypeOverlayBtn.addEventListener('click', addTextOverlay);
+
+refs.squishTopHandle.dataset.edge = 'top';
+refs.squishRightHandle.dataset.edge = 'right';
+refs.squishBottomHandle.dataset.edge = 'bottom';
+refs.squishLeftHandle.dataset.edge = 'left';
+
+[refs.squishTopHandle, refs.squishRightHandle, refs.squishBottomHandle, refs.squishLeftHandle]
+  .forEach(handle => handle.addEventListener('pointerdown', startSquishDrag));
+refs.canvasResizeHandle.addEventListener('pointerdown', startCanvasResizeDrag);
+
+refs.canvas.addEventListener('pointerdown', startOverlayDrag);
+refs.canvas.addEventListener('pointermove', event => {
+  updateCanvasCursor(event.clientX, event.clientY);
+});
+refs.canvas.addEventListener('pointerleave', () => {
+  if (!activeOverlayDrag && !activeTextOverlayDrag) refs.canvas.style.cursor = 'default';
+});
+
+window.addEventListener('pointermove', event => {
+  if (activeCanvasResizeDrag) {
+    const deltaX = event.clientX - activeCanvasResizeDrag.startX;
+    const deltaY = event.clientY - activeCanvasResizeDrag.startY;
+    S.cellWidth = clamp(Math.round(activeCanvasResizeDrag.startCellWidth + deltaX / 6), 8, 64);
+    S.cellHeight = clamp(Math.round(activeCanvasResizeDrag.startCellHeight + deltaY / 6), 8, 64);
+    syncControls();
+    renderCanvas();
+    return;
+  }
+
+  if (activeTextOverlayDrag) {
+    const overlay = S.textOverlays.find(item => item.id === activeTextOverlayDrag.id);
+    const cell = findCellAtPoint(event.clientX, event.clientY);
+    if (overlay && cell) {
+      overlay.row = cell.row - activeTextOverlayDrag.rowOffset;
+      overlay.col = cell.col - activeTextOverlayDrag.colOffset;
+      clampTextOverlayToBounds(overlay);
+      renderCanvas();
+    }
+    return;
+  }
+
+  if (activeOverlayDrag) {
+    const overlay = S.overlays.find(item => item.id === activeOverlayDrag.id);
+    const cell = findCellAtPoint(event.clientX, event.clientY);
+    if (overlay && cell) {
+      setOverlayCenterToCell(
+        overlay,
+        cell.row - activeOverlayDrag.rowOffset,
+        cell.col - activeOverlayDrag.colOffset
+      );
+      renderCanvas();
+    }
+    return;
+  }
+
+  if (!activeSquishDrag) return;
+  const rect = refs.previewShell.getBoundingClientRect();
+  const edge = activeSquishDrag.edge;
+  let delta = 0;
+  let range = 1;
+
+  if (edge === 'left') {
+    delta = event.clientX - activeSquishDrag.startX;
+    range = Math.max(80, rect.width * 0.28);
+  } else if (edge === 'right') {
+    delta = activeSquishDrag.startX - event.clientX;
+    range = Math.max(80, rect.width * 0.28);
+  } else if (edge === 'top') {
+    delta = event.clientY - activeSquishDrag.startY;
+    range = Math.max(80, rect.height * 0.28);
+  } else if (edge === 'bottom') {
+    delta = activeSquishDrag.startY - event.clientY;
+    range = Math.max(80, rect.height * 0.28);
+  }
+
+  S.edgeSquish[edge] = clamp(activeSquishDrag.startValue + delta / range, 0, 0.85);
+  renderSquishHandles();
+  renderCanvas();
+});
+
+window.addEventListener('pointerup', () => {
+  if (activeCanvasResizeDrag) {
+    activeCanvasResizeDrag = null;
+  }
+  if (activeTextOverlayDrag) {
+    activeTextOverlayDrag = null;
+    renderTypeOverlayControls();
+    refs.canvas.style.cursor = 'default';
+  }
+  if (activeOverlayDrag) {
+    activeOverlayDrag = null;
+    renderOverlayControls();
+    refs.canvas.style.cursor = 'default';
+  }
+  if (!activeSquishDrag) return;
+  activeSquishDrag = null;
+});
+
+document.getElementById('randomizeBtn').addEventListener('click', () => {
+  randomizePattern();
+  renderCanvas();
+});
+
+document.getElementById('clearBtn').addEventListener('click', () => {
+  clearPattern();
+  renderCanvas();
+});
+
+document.getElementById('saveBtn').addEventListener('click', saveImage);
+
+new ResizeObserver(() => {
+  renderSquishHandles();
+  renderCanvas();
+}).observe(refs.panel);
+
+function initWidgetDrag(widgetId, handleId, options = {}) {
+  const widget = document.getElementById(widgetId);
+  const handle = document.getElementById(handleId);
+  const {
+    top = 20,
+    left = 20,
+    collapsed = true
+  } = options;
+  let ox = 0;
+  let oy = 0;
+  let dragging = false;
+  let didDrag = false;
+
+  widget.classList.toggle('collapsed', collapsed);
+  widget.style.top = top + 'px';
+  widget.style.left = left + 'px';
+
+  handle.addEventListener('mousedown', event => {
+    dragging = true;
+    didDrag = false;
+    const rect = widget.getBoundingClientRect();
+    ox = event.clientX - rect.left;
+    oy = event.clientY - rect.top;
+    handle.style.cursor = 'grabbing';
+    event.preventDefault();
+  });
+
+  document.addEventListener('mousemove', event => {
+    if (!dragging) return;
+    let nextX = event.clientX - ox;
+    let nextY = event.clientY - oy;
+    const headerHeight = handle.offsetHeight;
+    nextX = Math.max(0, Math.min(window.innerWidth - widget.offsetWidth, nextX));
+    nextY = Math.max(0, Math.min(window.innerHeight - headerHeight, nextY));
+    widget.style.left = nextX + 'px';
+    widget.style.top = nextY + 'px';
+    didDrag = true;
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (!dragging) return;
+    dragging = false;
+    handle.style.cursor = '';
+  });
+
+  handle.addEventListener('click', () => {
+    if (didDrag) {
+      didDrag = false;
+      return;
+    }
+    widget.classList.toggle('collapsed');
+  });
+}
+
+initWidgetDrag('controlWidget', 'widgetDragHandle', { top: 92, left: 20, collapsed: false });
+initControlTabs();
+
+resizeGrid(S.rows, S.cols);
+seedPattern();
+render();
+</script>
+</body>
+</html>

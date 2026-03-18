@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="b" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" width="357.191" height="357.108" viewBox="0 0 357.191 357.108">
+  <g id="c" data-name="Layer 1">
+    <g>
+      <line x1="23.026" y1="22.985" x2="162.328" y2="162.287" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="30"/>
+      <polygon points="6.558 180.033 36.565 178.966 31.147 31.147 178.987 36.544 180.054 6.537 0 0 6.558 180.033"/>
+    </g>
+    <g>
+      <line x1="334.165" y1="334.123" x2="208.389" y2="208.347" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="30"/>
+      <polygon points="350.634 177.075 320.627 178.142 326.044 325.961 178.204 320.564 177.137 350.572 357.191 357.108 350.634 177.075"/>
+    </g>
+  </g>
+</svg>
