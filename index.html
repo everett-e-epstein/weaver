@@ -9,9 +9,9 @@
 </head>
 <body>
 <div class="app">
-  <div class="header">
+  <!-- <div class="header">
     weaver
-  </div>
+  </div> -->
   <div class="export-toolbar">
     <select id="exportRes" class="res-select export-select">
       <option value="svg">SVG</option>
@@ -48,7 +48,7 @@
 
     <div class="widget-header" id="widgetDragHandle" title="Click to expand / collapse · Drag to move">
       <span class="widget-title">
-       controls
+         weaver
         <svg class="chevron-icon" width="13" height="8" viewBox="0 0 13 9" fill="none" aria-hidden="true">
           <path d="M1 7L6.5 1.5L12 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
         </svg>
@@ -60,6 +60,9 @@
       <div class="widget-tabs" role="tablist" aria-label="Control panels">
         <button id="tabWeaveBtn" class="widget-tab active" type="button" role="tab" aria-selected="true" aria-controls="weaveTabPanel" aria-label="Weave tab" title="Weave">
           <span class="widget-tab-icon icon-weave" aria-hidden="true"></span>
+        </button>
+        <button id="tabWarpBtn" class="widget-tab" type="button" role="tab" aria-selected="false" aria-controls="warpTabPanel" aria-label="Warp tab" title="Warp">
+          <span class="widget-tab-icon icon-warp" aria-hidden="true"></span>
         </button>
         <button id="tabOverlayBtn" class="widget-tab" type="button" role="tab" aria-selected="false" aria-controls="overlayTabPanel" aria-label="Shapes tab" title="Shapes">
           <span class="widget-tab-icon icon-shapes" aria-hidden="true"></span>
@@ -109,6 +112,14 @@
           <input id="backgroundInput" class="color-field" type="color" value="#d7d1ca">
       </div>
 
+        <div>
+          <div class="lbl">Image Palette</div>
+          <div class="field-hint">Import an image and extract its dominant colors into the base weave threads.</div>
+          <div class="action-row">
+            <button id="importWeavePaletteBtn" class="action-btn" type="button">Import image palette</button>
+          </div>
+        </div>
+
         <div class="grid-2">
       <div>
             <div class="lbl">Rows</div>
@@ -133,6 +144,94 @@
 
       <hr class="section-rule">
       </div>
+      </div>
+      <div id="warpTabPanel" class="widget-tab-panel" role="tabpanel" aria-labelledby="tabWarpBtn">
+        <div class="weave-builder">
+          <div>
+            <div class="lbl">Stripe Warp</div>
+            <div class="field-hint">Bend horizontal and vertical thread bands into a repeating zig-zag. Use smooth for softer bends or sharp for pointed peaks.</div>
+          </div>
+
+          <div class="overlay-card warp-card">
+            <div class="lbl with-value">
+              <span>Row Threads</span>
+              <span id="rowWarpSummary" class="warp-summary">Off</span>
+            </div>
+            <div class="overlay-size-grid">
+              <div class="overlay-slider-field">
+                <div class="lbl">profile</div>
+                <select id="rowWarpStyle" class="res-select">
+                  <option value="off">Off</option>
+                  <option value="smooth">Smooth</option>
+                  <option value="sharp">Sharp</option>
+                </select>
+              </div>
+              <div class="overlay-slider-field">
+                <div class="lbl with-value">
+                  <span>repeats</span>
+                  <span id="rowWarpRepeatsValue">4x</span>
+                </div>
+                <input id="rowWarpRepeats" class="pill-slider" type="range" min="1" max="12" value="4" step="1">
+              </div>
+            </div>
+            <div class="overlay-slider-field">
+              <div class="lbl with-value">
+                <span>amount</span>
+                <span id="rowWarpAmountValue">0%</span>
+              </div>
+              <input id="rowWarpAmount" class="pill-slider" type="range" min="0" max="100" value="0" step="1">
+              <div class="field-hint">Moves horizontal stripe boundaries up and down across the weave width.</div>
+            </div>
+            <div class="overlay-slider-field">
+              <div class="lbl with-value">
+                <span>stagger</span>
+                <span id="rowWarpStaggerValue">50%</span>
+              </div>
+              <input id="rowWarpStagger" class="pill-slider" type="range" min="0" max="200" value="50" step="1">
+              <div class="field-hint">Offsets each neighboring row boundary in phase to build tighter diamonds and hourglass pinches.</div>
+            </div>
+          </div>
+
+          <div class="overlay-card warp-card">
+            <div class="lbl with-value">
+              <span>Column Threads</span>
+              <span id="colWarpSummary" class="warp-summary">Off</span>
+            </div>
+            <div class="overlay-size-grid">
+              <div class="overlay-slider-field">
+                <div class="lbl">profile</div>
+                <select id="colWarpStyle" class="res-select">
+                  <option value="off">Off</option>
+                  <option value="smooth">Smooth</option>
+                  <option value="sharp">Sharp</option>
+                </select>
+              </div>
+              <div class="overlay-slider-field">
+                <div class="lbl with-value">
+                  <span>repeats</span>
+                  <span id="colWarpRepeatsValue">4x</span>
+                </div>
+                <input id="colWarpRepeats" class="pill-slider" type="range" min="1" max="12" value="4" step="1">
+              </div>
+            </div>
+            <div class="overlay-slider-field">
+              <div class="lbl with-value">
+                <span>amount</span>
+                <span id="colWarpAmountValue">0%</span>
+              </div>
+              <input id="colWarpAmount" class="pill-slider" type="range" min="0" max="100" value="0" step="1">
+              <div class="field-hint">Moves vertical stripe boundaries side to side across the weave height.</div>
+            </div>
+            <div class="overlay-slider-field">
+              <div class="lbl with-value">
+                <span>stagger</span>
+                <span id="colWarpStaggerValue">50%</span>
+              </div>
+              <input id="colWarpStagger" class="pill-slider" type="range" min="0" max="200" value="50" step="1">
+              <div class="field-hint">Offsets each neighboring column boundary in phase to create stronger nested warp rhythms.</div>
+            </div>
+          </div>
+        </div>
       </div>
       <div id="overlayTabPanel" class="widget-tab-panel" role="tabpanel" aria-labelledby="tabOverlayBtn"></div>
       <div id="typeTabPanel" class="widget-tab-panel" role="tabpanel" aria-labelledby="tabTypeBtn"></div>
@@ -190,7 +289,7 @@
 </div>
 
 <script>
-const DEFAULT_PALETTE = ['#cfd6df', '#b4b4b4', '#ece1a2', '#6b8500', '#238337'];
+const DEFAULT_PALETTE = ['#9e64ff', '#e98ae8', '#ff5fad', '#ffd0c3', '#f0efef'];
 const POSTER_PALETTE = ['#f4d10b', '#ff3d32', '#1b8fe0', '#1f1a17', '#f0f0f0', '#6a7380'];
 const PIXEL_FONT = {
   'A': ['01110', '10001', '10001', '11111', '10001', '10001', '10001'],
@@ -245,17 +344,21 @@ const S = {
   cols: 70,
   cellWidth: 24,
   cellHeight: 24,
-  background: '#ececec',
+  background: '#f0efef',
   weaveMode: 'checker',
+  warp: {
+    row: { style: 'off', amount: 0, repeats: 4, stagger: 50 },
+    col: { style: 'off', amount: 0, repeats: 4, stagger: 50 }
+  },
   rowStripes: [
-    { color: DEFAULT_PALETTE[1], size: 2 },
-    { color: DEFAULT_PALETTE[2], size: 1 },
-    { color: DEFAULT_PALETTE[3], size: 1 }
+    { color: DEFAULT_PALETTE[0], size: 1 },
+    { color: DEFAULT_PALETTE[1], size: 1 },
+    { color: DEFAULT_PALETTE[2], size: 1 }
   ],
   colStripes: [
-    { color: DEFAULT_PALETTE[0], size: 2 },
     { color: DEFAULT_PALETTE[1], size: 1 },
-    { color: DEFAULT_PALETTE[3], size: 1 }
+    { color: DEFAULT_PALETTE[3], size: 1 },
+    { color: DEFAULT_PALETTE[4], size: 1 }
   ],
   rowBandWeights: [96],
   colBandWeights: [96],
@@ -274,9 +377,11 @@ const refs = {
   panel: document.getElementById('rightPanel'),
   previewShell: document.querySelector('.preview-shell'),
   tabWeaveBtn: document.getElementById('tabWeaveBtn'),
+  tabWarpBtn: document.getElementById('tabWarpBtn'),
   tabOverlayBtn: document.getElementById('tabOverlayBtn'),
   tabTypeBtn: document.getElementById('tabTypeBtn'),
   weaveTabPanel: document.getElementById('weaveTabPanel'),
+  warpTabPanel: document.getElementById('warpTabPanel'),
   overlayTabPanel: document.getElementById('overlayTabPanel'),
   typeTabPanel: document.getElementById('typeTabPanel'),
   weaveModeSelect: document.getElementById('weaveModeSelect'),
@@ -292,10 +397,27 @@ const refs = {
   typeOverlayList: document.getElementById('typeOverlayList'),
   addTypeOverlayBtn: document.getElementById('addTypeOverlayBtn'),
   backgroundInput: document.getElementById('backgroundInput'),
+  importWeavePaletteBtn: document.getElementById('importWeavePaletteBtn'),
   rowsInput: document.getElementById('rowsInput'),
   rowsValue: document.getElementById('rowsValue'),
   colsInput: document.getElementById('colsInput'),
   colsValue: document.getElementById('colsValue'),
+  rowWarpStyle: document.getElementById('rowWarpStyle'),
+  rowWarpRepeats: document.getElementById('rowWarpRepeats'),
+  rowWarpRepeatsValue: document.getElementById('rowWarpRepeatsValue'),
+  rowWarpAmount: document.getElementById('rowWarpAmount'),
+  rowWarpAmountValue: document.getElementById('rowWarpAmountValue'),
+  rowWarpStagger: document.getElementById('rowWarpStagger'),
+  rowWarpStaggerValue: document.getElementById('rowWarpStaggerValue'),
+  rowWarpSummary: document.getElementById('rowWarpSummary'),
+  colWarpStyle: document.getElementById('colWarpStyle'),
+  colWarpRepeats: document.getElementById('colWarpRepeats'),
+  colWarpRepeatsValue: document.getElementById('colWarpRepeatsValue'),
+  colWarpAmount: document.getElementById('colWarpAmount'),
+  colWarpAmountValue: document.getElementById('colWarpAmountValue'),
+  colWarpStagger: document.getElementById('colWarpStagger'),
+  colWarpStaggerValue: document.getElementById('colWarpStaggerValue'),
+  colWarpSummary: document.getElementById('colWarpSummary'),
   squishTopHandle: document.getElementById('squishTopHandle'),
   squishRightHandle: document.getElementById('squishRightHandle'),
   squishBottomHandle: document.getElementById('squishBottomHandle'),
@@ -340,10 +462,135 @@ function mixHexColors(colorA, colorB, weightB) {
   return `rgb(${mix('r')}, ${mix('g')}, ${mix('b')})`;
 }
 
+function rgbToHex(r, g, b) {
+  return `#${[r, g, b].map(channel => clamp(Math.round(channel), 0, 255).toString(16).padStart(2, '0')).join('')}`;
+}
+
 function readableInk(color) {
   const { r, g, b } = hexToRgb(color);
   const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
   return luminance > 0.65 ? 'rgba(17, 17, 17, 0.88)' : 'rgba(255, 255, 255, 0.92)';
+}
+
+function loadImageFromFile(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const image = new Image();
+    image.onload = () => {
+      URL.revokeObjectURL(url);
+      resolve(image);
+    };
+    image.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error('Unable to load image.'));
+    };
+    image.src = url;
+  });
+}
+
+async function extractPaletteFromImageFile(file, maxColors = 6) {
+  const image = await loadImageFromFile(file);
+  const maxDimension = 80;
+  const scale = Math.min(1, maxDimension / Math.max(image.naturalWidth || 1, image.naturalHeight || 1));
+  const width = Math.max(1, Math.round((image.naturalWidth || 1) * scale));
+  const height = Math.max(1, Math.round((image.naturalHeight || 1) * scale));
+  const canvas = document.createElement('canvas');
+  const context = canvas.getContext('2d', { willReadFrequently: true });
+  if (!context) return [];
+  canvas.width = width;
+  canvas.height = height;
+  context.drawImage(image, 0, 0, width, height);
+  const { data } = context.getImageData(0, 0, width, height);
+  const buckets = new Map();
+  const step = 32;
+
+  for (let index = 0; index < data.length; index += 4) {
+    const alpha = data[index + 3];
+    if (alpha < 120) continue;
+    const r = data[index];
+    const g = data[index + 1];
+    const b = data[index + 2];
+    const key = [
+      Math.floor(r / step),
+      Math.floor(g / step),
+      Math.floor(b / step)
+    ].join('-');
+    const bucket = buckets.get(key) || { r: 0, g: 0, b: 0, count: 0 };
+    bucket.r += r;
+    bucket.g += g;
+    bucket.b += b;
+    bucket.count += 1;
+    buckets.set(key, bucket);
+  }
+
+  const ranked = [...buckets.values()]
+    .map(bucket => {
+      const r = bucket.r / bucket.count;
+      const g = bucket.g / bucket.count;
+      const b = bucket.b / bucket.count;
+      const maxChannel = Math.max(r, g, b);
+      const minChannel = Math.min(r, g, b);
+      const saturation = (maxChannel - minChannel) / 255;
+      return {
+        color: rgbToHex(r, g, b),
+        score: bucket.count * (0.55 + saturation * 0.9)
+      };
+    })
+    .sort((a, b) => b.score - a.score);
+
+  const palette = [];
+  for (const entry of ranked) {
+    const candidate = entry.color;
+    const { r, g, b } = hexToRgb(candidate);
+    const distinct = palette.every(existing => {
+      const sample = hexToRgb(existing);
+      const distance = Math.hypot(r - sample.r, g - sample.g, b - sample.b);
+      return distance > 36;
+    });
+    if (distinct) palette.push(candidate);
+    if (palette.length >= maxColors) break;
+  }
+
+  if (!palette.length && ranked[0]) palette.push(ranked[0].color);
+  if (palette.length === 1) palette.push(palette[0]);
+  return palette;
+}
+
+function stripeProgramFromPalette(existingProgram, palette, offset = 0) {
+  const safePalette = palette.length ? palette : [DEFAULT_PALETTE[0], DEFAULT_PALETTE[1]];
+  const fallbackSizes = existingProgram?.length
+    ? existingProgram.map(stripe => Math.max(1, stripe.size))
+    : [2, 1, 2, 1];
+  const count = clamp(safePalette.length, 2, 8);
+  return Array.from({ length: count }, (_, index) => ({
+    color: safePalette[(index + offset) % safePalette.length],
+    size: fallbackSizes[index % fallbackSizes.length]
+  }));
+}
+
+function applyPaletteToStripeConfig(config, palette) {
+  if (!palette?.length) return false;
+  config.rowStripes = stripeProgramFromPalette(config.rowStripes, palette, 0);
+  config.colStripes = stripeProgramFromPalette(config.colStripes, palette, palette.length > 1 ? 1 : 0);
+  return true;
+}
+
+function promptImagePalette(applyPalette) {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.addEventListener('change', async event => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    try {
+      const palette = await extractPaletteFromImageFile(file);
+      if (!palette.length) return;
+      applyPalette(palette);
+    } catch (error) {
+      console.error('Failed to extract palette from image.', error);
+    }
+  }, { once: true });
+  input.click();
 }
 
 function applyStripeTheme(row, color) {
@@ -552,14 +799,14 @@ function createTextOverlay(overrides = {}) {
     scale: 2,
     weaveMode: 'checker',
     rowStripes: [
-      { color: '#f7f0df', size: 2 },
-      { color: '#fffaf1', size: 1 },
-      { color: '#f7f0df', size: 2 }
+      { color: DEFAULT_PALETTE[1], size: 2 },
+      { color: DEFAULT_PALETTE[2], size: 1 },
+      { color: DEFAULT_PALETTE[3], size: 2 }
     ],
     colStripes: [
-      { color: '#efe6d2', size: 1 },
-      { color: '#fffdf8', size: 1 },
-      { color: '#efe6d2', size: 1 }
+      { color: DEFAULT_PALETTE[0], size: 1 },
+      { color: DEFAULT_PALETTE[4], size: 1 },
+      { color: DEFAULT_PALETTE[1], size: 1 }
     ]
   };
   const config = { ...defaults, ...overrides };
@@ -584,14 +831,14 @@ function createOverlay(shape = 'rect', overrides = {}) {
         height: 0.28,
         weaveMode: 'checker',
         rowStripes: [
-          { color: '#ff2238', size: 2 },
-          { color: '#ffc2d4', size: 1 },
-          { color: '#ff2238', size: 2 }
+          { color: DEFAULT_PALETTE[2], size: 2 },
+          { color: DEFAULT_PALETTE[3], size: 1 },
+          { color: DEFAULT_PALETTE[1], size: 2 }
         ],
         colStripes: [
-          { color: '#a9001d', size: 1 },
-          { color: '#ffd5df', size: 1 },
-          { color: '#a9001d', size: 1 }
+          { color: DEFAULT_PALETTE[0], size: 1 },
+          { color: DEFAULT_PALETTE[4], size: 1 },
+          { color: DEFAULT_PALETTE[1], size: 1 }
         ]
       }
     : {
@@ -601,14 +848,14 @@ function createOverlay(shape = 'rect', overrides = {}) {
         height: 0.38,
         weaveMode: 'checker',
         rowStripes: [
-          { color: '#0b88a4', size: 2 },
-          { color: '#bdd7f1', size: 1 },
-          { color: '#0b88a4', size: 2 }
+          { color: DEFAULT_PALETTE[0], size: 2 },
+          { color: DEFAULT_PALETTE[1], size: 1 },
+          { color: DEFAULT_PALETTE[3], size: 2 }
         ],
         colStripes: [
-          { color: '#0a5b75', size: 1 },
-          { color: '#d4e4f6', size: 1 },
-          { color: '#0a5b75', size: 1 }
+          { color: '#4f3dd1', size: 1 },
+          { color: DEFAULT_PALETTE[4], size: 1 },
+          { color: DEFAULT_PALETTE[2], size: 1 }
         ]
       };
   const config = { ...defaults, ...overrides };
@@ -738,6 +985,33 @@ function removeTextOverlayStripe(id, axis, index) {
   overlay[key].splice(index, 1);
   renderTypeOverlayControls();
   renderCanvas();
+}
+
+function importPaletteToBaseWeave() {
+  promptImagePalette(palette => {
+    if (!applyPaletteToStripeConfig(S, palette)) return;
+    refreshGeneratedPattern();
+    renderWeaveControls();
+    renderCanvas();
+  });
+}
+
+function importPaletteToOverlay(id) {
+  promptImagePalette(palette => {
+    const overlay = S.overlays.find(item => item.id === id);
+    if (!overlay || !applyPaletteToStripeConfig(overlay, palette)) return;
+    renderOverlayControls();
+    renderCanvas();
+  });
+}
+
+function importPaletteToTextOverlay(id) {
+  promptImagePalette(palette => {
+    const overlay = S.textOverlays.find(item => item.id === id);
+    if (!overlay || !applyPaletteToStripeConfig(overlay, palette)) return;
+    renderTypeOverlayControls();
+    renderCanvas();
+  });
 }
 
 function addStripe(axis) {
@@ -1061,6 +1335,20 @@ function applyEdgeSquishToSizes(sizes, startSquish, endSquish) {
   return warped.map(value => value * normalize);
 }
 
+function boundaryWarpOffset(axis, boundaryIndex, sampleT, sizes) {
+  const config = S.warp[axis];
+  const maxBoundary = axis === 'row' ? S.rows : S.cols;
+  if (!config || config.style === 'off' || config.amount <= 0) return 0;
+  if (boundaryIndex <= 0 || boundaryIndex >= maxBoundary) return 0;
+
+  const before = sizes[boundaryIndex - 1] || sizes[0] || 0;
+  const after = sizes[boundaryIndex] || sizes[sizes.length - 1] || 0;
+  const safeAmplitude = Math.min(before, after) * 0.48;
+  const stagger = (config.stagger ?? 50) / 100;
+  const phase = sampleT * Math.max(1, config.repeats) + boundaryIndex * stagger;
+  return safeAmplitude * (config.amount / 100) * waveValue(config.style, phase);
+}
+
 function buildGeometry() {
   const rowBands = buildBandData(S.rows, S.rowBandSizes, S.rowBandScales);
   const colBands = buildBandData(S.cols, S.colBandSizes, S.colBandScales);
@@ -1076,19 +1364,49 @@ function buildGeometry() {
   );
   const rowOffsets = [];
   const colOffsets = [];
+  const rowEdges = [0];
+  const colEdges = [0];
   let width = 0;
   let height = 0;
 
   for (let col = 0; col < S.cols; col += 1) {
     colOffsets[col] = width;
     width += colWidths[col];
+    colEdges.push(width);
   }
   for (let row = 0; row < S.rows; row += 1) {
     rowOffsets[row] = height;
     height += rowHeights[row];
+    rowEdges.push(height);
   }
 
-  geometryCache = { rowBands, colBands, rowHeights, colWidths, rowOffsets, colOffsets, width, height };
+  const gridPoints = Array.from({ length: S.rows + 1 }, () => Array(S.cols + 1));
+  for (let row = 0; row <= S.rows; row += 1) {
+    const baseY = rowEdges[row];
+    const yNorm = height ? baseY / height : 0;
+    for (let col = 0; col <= S.cols; col += 1) {
+      const baseX = colEdges[col];
+      const xNorm = width ? baseX / width : 0;
+      gridPoints[row][col] = {
+        x: clamp(baseX + boundaryWarpOffset('col', col, yNorm, colWidths), 0, width),
+        y: clamp(baseY + boundaryWarpOffset('row', row, xNorm, rowHeights), 0, height)
+      };
+    }
+  }
+
+  geometryCache = {
+    rowBands,
+    colBands,
+    rowHeights,
+    colWidths,
+    rowOffsets,
+    colOffsets,
+    rowEdges,
+    colEdges,
+    gridPoints,
+    width,
+    height
+  };
   return geometryCache;
 }
 
@@ -1122,6 +1440,44 @@ function patternPointFromClient(clientX, clientY) {
   const x = (clientX - rect.left) / rect.width * geometry.width;
   const y = (clientY - rect.top) / rect.height * geometry.height;
   return { x, y, geometry, rect };
+}
+
+function cellPolygon(geometry, row, col) {
+  return [
+    geometry.gridPoints[row][col],
+    geometry.gridPoints[row][col + 1],
+    geometry.gridPoints[row + 1][col + 1],
+    geometry.gridPoints[row + 1][col]
+  ];
+}
+
+function cellCenter(geometry, row, col) {
+  const points = cellPolygon(geometry, row, col);
+  return points.reduce((acc, point) => ({
+    x: acc.x + point.x / points.length,
+    y: acc.y + point.y / points.length
+  }), { x: 0, y: 0 });
+}
+
+function pointInPolygon(x, y, points) {
+  let inside = false;
+  for (let index = 0, previous = points.length - 1; index < points.length; previous = index, index += 1) {
+    const current = points[index];
+    const prior = points[previous];
+    const intersects = ((current.y > y) !== (prior.y > y))
+      && (x < (prior.x - current.x) * (y - current.y) / ((prior.y - current.y) || 1e-6) + current.x);
+    if (intersects) inside = !inside;
+  }
+  return inside;
+}
+
+function offsetIndexAtPoint(value, offsets, sizes) {
+  for (let index = 0; index < offsets.length; index += 1) {
+    const start = offsets[index];
+    const end = start + sizes[index];
+    if (value >= start && value <= end) return index;
+  }
+  return -1;
 }
 
 function overlayMapForHitTest(overlay, geometry) {
@@ -1170,9 +1526,11 @@ function overlayAnchorCell(overlay, geometry = buildGeometry()) {
   let bestColDistance = Infinity;
   const targetX = overlay.x * geometry.width;
   const targetY = overlay.y * geometry.height;
+  const sampleRow = Math.min(S.rows - 1, Math.floor(S.rows / 2));
+  const sampleCol = Math.min(S.cols - 1, Math.floor(S.cols / 2));
 
   for (let row = 0; row < S.rows; row += 1) {
-    const centerY = geometry.rowOffsets[row] + geometry.rowHeights[row] / 2;
+    const centerY = cellCenter(geometry, row, sampleCol).y;
     const distance = Math.abs(centerY - targetY);
     if (distance < bestRowDistance) {
       bestRowDistance = distance;
@@ -1181,7 +1539,7 @@ function overlayAnchorCell(overlay, geometry = buildGeometry()) {
   }
 
   for (let col = 0; col < S.cols; col += 1) {
-    const centerX = geometry.colOffsets[col] + geometry.colWidths[col] / 2;
+    const centerX = cellCenter(geometry, sampleRow, col).x;
     const distance = Math.abs(centerX - targetX);
     if (distance < bestColDistance) {
       bestColDistance = distance;
@@ -1206,8 +1564,7 @@ function clampTextOverlayToBounds(overlay) {
 function setOverlayCenterToCell(overlay, row, col, geometry = buildGeometry()) {
   const safeRow = clamp(row, 0, S.rows - 1);
   const safeCol = clamp(col, 0, S.cols - 1);
-  const centerX = geometry.colOffsets[safeCol] + geometry.colWidths[safeCol] / 2;
-  const centerY = geometry.rowOffsets[safeRow] + geometry.rowHeights[safeRow] / 2;
+  const { x: centerX, y: centerY } = cellCenter(geometry, safeRow, safeCol);
   overlay.x = clamp(centerX / geometry.width, overlay.width / 2, 1 - overlay.width / 2);
   overlay.y = clamp(centerY / geometry.height, overlay.height / 2, 1 - overlay.height / 2);
 }
@@ -1233,9 +1590,11 @@ function prepareOverlayMaps(geometry) {
     const colMap = Array(S.cols).fill(-1);
     let localRow = 0;
     let localCol = 0;
+    const sampleRow = Math.min(S.rows - 1, Math.floor(S.rows / 2));
+    const sampleCol = Math.min(S.cols - 1, Math.floor(S.cols / 2));
 
     for (let row = 0; row < S.rows; row += 1) {
-      const centerY = geometry.rowOffsets[row] + geometry.rowHeights[row] / 2;
+      const centerY = cellCenter(geometry, row, sampleCol).y;
       if (centerY >= bounds.top && centerY <= bounds.top + bounds.height) {
         rowMap[row] = localRow;
         localRow += 1;
@@ -1243,7 +1602,7 @@ function prepareOverlayMaps(geometry) {
     }
 
     for (let col = 0; col < S.cols; col += 1) {
-      const centerX = geometry.colOffsets[col] + geometry.colWidths[col] / 2;
+      const centerX = cellCenter(geometry, sampleRow, col).x;
       if (centerX >= bounds.left && centerX <= bounds.left + bounds.width) {
         colMap[col] = localCol;
         localCol += 1;
@@ -1274,8 +1633,7 @@ function overlayColorAtCell(overlayMap, row, col, geometry) {
   const localCol = overlayMap.colMap[col];
   if (localRow < 0 || localCol < 0) return null;
 
-  const x = geometry.colOffsets[col] + geometry.colWidths[col] / 2;
-  const y = geometry.rowOffsets[row] + geometry.rowHeights[row] / 2;
+  const { x, y } = cellCenter(geometry, row, col);
   if (!overlayContainsPoint(overlayMap, x, y)) return null;
 
   return weaveColorForPrograms(overlayMap.overlay, localRow, localCol);
@@ -1308,18 +1666,32 @@ function resolvedCellColor(row, col, geometry, overlayMaps, textOverlayMaps) {
 function motifSegments(row, col, geometry, overlayMaps, textOverlayMaps) {
   const color = resolvedCellColor(row, col, geometry, overlayMaps, textOverlayMaps);
   if (!color) return [];
-  const x = geometry.colOffsets[col];
-  const y = geometry.rowOffsets[row];
-  const width = geometry.colWidths[col];
-  const height = geometry.rowHeights[row];
   return [{
-    x,
-    y,
-    width,
-    height,
-    radius: 0,
+    points: cellPolygon(geometry, row, col),
     color
   }];
+}
+
+function strokePolyline(ctx, points) {
+  if (!points.length) return;
+  ctx.beginPath();
+  ctx.moveTo(points[0].x, points[0].y);
+  for (let index = 1; index < points.length; index += 1) {
+    ctx.lineTo(points[index].x, points[index].y);
+  }
+  ctx.stroke();
+}
+
+function fillPolygon(ctx, points, fill) {
+  if (!points.length) return;
+  ctx.beginPath();
+  ctx.moveTo(points[0].x, points[0].y);
+  for (let index = 1; index < points.length; index += 1) {
+    ctx.lineTo(points[index].x, points[index].y);
+  }
+  ctx.closePath();
+  ctx.fillStyle = fill;
+  ctx.fill();
 }
 
 function drawPattern(ctx, geometry) {
@@ -1332,27 +1704,18 @@ function drawPattern(ctx, geometry) {
   ctx.lineWidth = Math.max(0.75, Math.min(S.cellWidth, S.cellHeight) * 0.035);
   for (let index = 1; index < S.rowBandSizes.length; index += 1) {
     const row = geometry.rowBands.boundaries[index];
-    const y = geometry.rowOffsets[row] || geometry.height;
-    ctx.beginPath();
-    ctx.moveTo(0, y);
-    ctx.lineTo(geometry.width, y);
-    ctx.stroke();
+    strokePolyline(ctx, geometry.gridPoints[row]);
   }
   for (let index = 1; index < S.colBandSizes.length; index += 1) {
     const col = geometry.colBands.boundaries[index];
-    const x = geometry.colOffsets[col] || geometry.width;
-    ctx.beginPath();
-    ctx.moveTo(x, 0);
-    ctx.lineTo(x, geometry.height);
-    ctx.stroke();
+    strokePolyline(ctx, geometry.gridPoints.map(points => points[col]));
   }
 
   for (let row = 0; row < S.rows; row += 1) {
     for (let col = 0; col < S.cols; col += 1) {
       const segments = motifSegments(row, col, geometry, overlayMaps, textOverlayMaps);
       for (const segment of segments) {
-        ctx.fillStyle = segment.color;
-        fillRoundedRect(ctx, segment.x, segment.y, segment.width, segment.height, segment.radius);
+        fillPolygon(ctx, segment.points, segment.color);
       }
     }
   }
@@ -1483,6 +1846,17 @@ function renderOverlayControls() {
     dragHint.className = 'field-hint overlay-drag-hint';
     dragHint.textContent = `Drag on canvas to reposition. Snaps to grid at row ${anchor.row + 1}, column ${anchor.col + 1}.`;
     card.appendChild(dragHint);
+
+    const paletteRow = document.createElement('div');
+    paletteRow.className = 'action-row overlay-palette-row';
+    const paletteBtn = document.createElement('button');
+    paletteBtn.type = 'button';
+    paletteBtn.className = 'action-btn';
+    paletteBtn.textContent = 'Import image palette';
+    paletteBtn.setAttribute('aria-label', 'Import image palette for shape');
+    paletteBtn.addEventListener('click', () => importPaletteToOverlay(overlay.id));
+    paletteRow.appendChild(paletteBtn);
+    card.appendChild(paletteRow);
 
     const sliderGrid = document.createElement('div');
     sliderGrid.className = 'overlay-size-grid';
@@ -1730,6 +2104,17 @@ function renderTypeOverlayControls() {
     dragHint.textContent = `Drag on canvas to reposition. Snaps to grid at row ${overlay.row + 1}, column ${overlay.col + 1}.`;
     card.appendChild(dragHint);
 
+    const paletteRow = document.createElement('div');
+    paletteRow.className = 'action-row overlay-palette-row';
+    const paletteBtn = document.createElement('button');
+    paletteBtn.type = 'button';
+    paletteBtn.className = 'action-btn';
+    paletteBtn.textContent = 'Import image palette';
+    paletteBtn.setAttribute('aria-label', 'Import image palette for type');
+    paletteBtn.addEventListener('click', () => importPaletteToTextOverlay(overlay.id));
+    paletteRow.appendChild(paletteBtn);
+    card.appendChild(paletteRow);
+
     ['row', 'col'].forEach(axis => {
       const key = axis === 'row' ? 'rowStripes' : 'colStripes';
       const group = document.createElement('div');
@@ -1928,9 +2313,51 @@ function updateValueSlider(input, readout, value) {
   readout.textContent = String(numericValue);
 }
 
+function normalizedWaveCycle(value) {
+  return ((value % 1) + 1) % 1;
+}
+
+function waveValue(style, cycle) {
+  const t = normalizedWaveCycle(cycle);
+  if (style === 'sharp') return 1 - 4 * Math.abs(t - 0.5);
+  return -Math.cos(t * Math.PI * 2);
+}
+
+function warpSummary(config) {
+  if (!config || config.style === 'off' || config.amount <= 0) return 'Off';
+  return `${config.style === 'sharp' ? 'Sharp' : 'Smooth'} · ${config.amount}% · ${config.repeats}x · ${config.stagger}% st`;
+}
+
+function syncWarpAxisControls(axis) {
+  const config = S.warp[axis];
+  const styleRef = axis === 'row' ? refs.rowWarpStyle : refs.colWarpStyle;
+  const repeatsRef = axis === 'row' ? refs.rowWarpRepeats : refs.colWarpRepeats;
+  const repeatsValueRef = axis === 'row' ? refs.rowWarpRepeatsValue : refs.colWarpRepeatsValue;
+  const amountRef = axis === 'row' ? refs.rowWarpAmount : refs.colWarpAmount;
+  const amountValueRef = axis === 'row' ? refs.rowWarpAmountValue : refs.colWarpAmountValue;
+  const staggerRef = axis === 'row' ? refs.rowWarpStagger : refs.colWarpStagger;
+  const staggerValueRef = axis === 'row' ? refs.rowWarpStaggerValue : refs.colWarpStaggerValue;
+  const summaryRef = axis === 'row' ? refs.rowWarpSummary : refs.colWarpSummary;
+
+  styleRef.value = config.style;
+  repeatsRef.value = String(config.repeats);
+  repeatsValueRef.textContent = `${config.repeats}x`;
+  amountRef.value = String(config.amount);
+  amountValueRef.textContent = `${config.amount}%`;
+  staggerRef.value = String(config.stagger);
+  staggerValueRef.textContent = `${config.stagger}%`;
+  summaryRef.textContent = warpSummary(config);
+}
+
+function renderWarpControls() {
+  syncWarpAxisControls('row');
+  syncWarpAxisControls('col');
+}
+
 function render() {
   syncControls();
   renderWeaveControls();
+  renderWarpControls();
   renderOverlayControls();
   renderTypeOverlayControls();
   renderControlTabs();
@@ -1941,6 +2368,7 @@ function render() {
 function renderControlTabs() {
   const tabs = [
     { id: 'weave', button: refs.tabWeaveBtn, panel: refs.weaveTabPanel },
+    { id: 'warp', button: refs.tabWarpBtn, panel: refs.warpTabPanel },
     { id: 'overlay', button: refs.tabOverlayBtn, panel: refs.overlayTabPanel },
     { id: 'type', button: refs.tabTypeBtn, panel: refs.typeTabPanel }
   ];
@@ -1975,6 +2403,7 @@ function initControlTabs() {
   moveWidgetPanelContents('overlayWidget', refs.overlayTabPanel);
   moveWidgetPanelContents('typeWidget', refs.typeTabPanel);
   refs.tabWeaveBtn.addEventListener('click', () => setActiveControlTab('weave'));
+  refs.tabWarpBtn.addEventListener('click', () => setActiveControlTab('warp'));
   refs.tabOverlayBtn.addEventListener('click', () => setActiveControlTab('overlay'));
   refs.tabTypeBtn.addEventListener('click', () => setActiveControlTab('type'));
   renderControlTabs();
@@ -2062,27 +2491,30 @@ function findCellAtPoint(clientX, clientY) {
   const { x, y, geometry } = point;
   if (x < 0 || y < 0 || x > geometry.width || y > geometry.height) return null;
 
-  let col = -1;
-  let row = -1;
+  const approxRow = offsetIndexAtPoint(y, geometry.rowOffsets, geometry.rowHeights);
+  const approxCol = offsetIndexAtPoint(x, geometry.colOffsets, geometry.colWidths);
+  const rowStart = Math.max(0, approxRow - 2);
+  const rowEnd = Math.min(S.rows - 1, approxRow + 2);
+  const colStart = Math.max(0, approxCol - 2);
+  const colEnd = Math.min(S.cols - 1, approxCol + 2);
 
-  for (let index = 0; index < geometry.colOffsets.length; index += 1) {
-    const start = geometry.colOffsets[index];
-    const end = start + geometry.colWidths[index];
-    if (x >= start && x <= end) {
-      col = index;
-      break;
-    }
-  }
-  for (let index = 0; index < geometry.rowOffsets.length; index += 1) {
-    const start = geometry.rowOffsets[index];
-    const end = start + geometry.rowHeights[index];
-    if (y >= start && y <= end) {
-      row = index;
-      break;
+  for (let row = rowStart; row <= rowEnd; row += 1) {
+    for (let col = colStart; col <= colEnd; col += 1) {
+      if (pointInPolygon(x, y, cellPolygon(geometry, row, col))) {
+        return { row, col };
+      }
     }
   }
 
-  return row >= 0 && col >= 0 ? { row, col } : null;
+  for (let row = 0; row < S.rows; row += 1) {
+    for (let col = 0; col < S.cols; col += 1) {
+      if (pointInPolygon(x, y, cellPolygon(geometry, row, col))) {
+        return { row, col };
+      }
+    }
+  }
+
+  return null;
 }
 
 function updateCanvasCursor(clientX, clientY) {
@@ -2323,8 +2755,16 @@ function handleSectionBoundaryKeydown(event) {
   }
 }
 
-function svgRect(x, y, width, height, radius, fill) {
-  return `<rect x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${width.toFixed(2)}" height="${height.toFixed(2)}" rx="${radius.toFixed(2)}" fill="${fill}"></rect>`;
+function svgPoints(points) {
+  return points.map(point => `${point.x.toFixed(2)},${point.y.toFixed(2)}`).join(' ');
+}
+
+function svgPolygon(points, fill) {
+  return `<polygon points="${svgPoints(points)}" fill="${fill}"></polygon>`;
+}
+
+function svgPolyline(points, stroke, strokeWidth) {
+  return `<polyline points="${svgPoints(points)}" fill="none" stroke="${stroke}" stroke-width="${strokeWidth.toFixed(2)}"></polyline>`;
 }
 
 function buildPatternSVG() {
@@ -2340,13 +2780,19 @@ function buildPatternSVG() {
 
   for (let index = 1; index < S.rowBandSizes.length; index += 1) {
     const row = geometry.rowBands.boundaries[index];
-    const y = geometry.rowOffsets[row] || geometry.height;
-    parts.push(`    <line x1="0" y1="${y.toFixed(2)}" x2="${geometry.width.toFixed(2)}" y2="${y.toFixed(2)}"></line>`);
+    parts.push('    ' + svgPolyline(
+      geometry.gridPoints[row],
+      'white',
+      Math.max(1, Math.min(S.cellWidth, S.cellHeight) * 0.06)
+    ));
   }
   for (let index = 1; index < S.colBandSizes.length; index += 1) {
     const col = geometry.colBands.boundaries[index];
-    const x = geometry.colOffsets[col] || geometry.width;
-    parts.push(`    <line x1="${x.toFixed(2)}" y1="0" x2="${x.toFixed(2)}" y2="${geometry.height.toFixed(2)}"></line>`);
+    parts.push('    ' + svgPolyline(
+      geometry.gridPoints.map(points => points[col]),
+      'white',
+      Math.max(1, Math.min(S.cellWidth, S.cellHeight) * 0.06)
+    ));
   }
   parts.push('  </g>');
   parts.push('  <g>');
@@ -2355,7 +2801,7 @@ function buildPatternSVG() {
     for (let col = 0; col < S.cols; col += 1) {
       const segments = motifSegments(row, col, geometry, overlayMaps, textOverlayMaps);
       for (const segment of segments) {
-        parts.push('    ' + svgRect(segment.x, segment.y, segment.width, segment.height, segment.radius, segment.color));
+        parts.push('    ' + svgPolygon(segment.points, segment.color));
       }
     }
   }
@@ -2423,6 +2869,56 @@ refs.colsInput.addEventListener('input', event => {
 refs.weaveModeSelect.addEventListener('change', event => {
   S.weaveMode = event.target.value;
   refreshGeneratedPattern();
+  renderCanvas();
+});
+
+refs.importWeavePaletteBtn.addEventListener('click', importPaletteToBaseWeave);
+
+refs.rowWarpStyle.addEventListener('change', event => {
+  S.warp.row.style = event.target.value;
+  renderWarpControls();
+  renderCanvas();
+});
+
+refs.rowWarpRepeats.addEventListener('input', event => {
+  S.warp.row.repeats = Number(event.target.value);
+  renderWarpControls();
+  renderCanvas();
+});
+
+refs.rowWarpAmount.addEventListener('input', event => {
+  S.warp.row.amount = Number(event.target.value);
+  renderWarpControls();
+  renderCanvas();
+});
+
+refs.rowWarpStagger.addEventListener('input', event => {
+  S.warp.row.stagger = Number(event.target.value);
+  renderWarpControls();
+  renderCanvas();
+});
+
+refs.colWarpStyle.addEventListener('change', event => {
+  S.warp.col.style = event.target.value;
+  renderWarpControls();
+  renderCanvas();
+});
+
+refs.colWarpRepeats.addEventListener('input', event => {
+  S.warp.col.repeats = Number(event.target.value);
+  renderWarpControls();
+  renderCanvas();
+});
+
+refs.colWarpAmount.addEventListener('input', event => {
+  S.warp.col.amount = Number(event.target.value);
+  renderWarpControls();
+  renderCanvas();
+});
+
+refs.colWarpStagger.addEventListener('input', event => {
+  S.warp.col.stagger = Number(event.target.value);
+  renderWarpControls();
   renderCanvas();
 });
 
@@ -2600,7 +3096,7 @@ function initWidgetDrag(widgetId, handleId, options = {}) {
   });
 }
 
-initWidgetDrag('controlWidget', 'widgetDragHandle', { top: 92, left: 20, collapsed: false });
+initWidgetDrag('controlWidget', 'widgetDragHandle', { top: 12, left: 12, collapsed: true });
 initControlTabs();
 
 resizeGrid(S.rows, S.cols);
