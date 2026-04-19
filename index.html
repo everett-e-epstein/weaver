@@ -70,6 +70,9 @@
         <button id="tabTypeBtn" class="widget-tab" type="button" role="tab" aria-selected="false" aria-controls="typeTabPanel" aria-label="Type tab" title="Type">
           <span class="widget-tab-icon icon-type" aria-hidden="true"></span>
         </button>
+        <button id="tabMeanderBtn" class="widget-tab" type="button" role="tab" aria-selected="false" aria-controls="meanderTabPanel" aria-label="Meander tab" title="Meander">
+          <span class="widget-tab-icon icon-meander" aria-hidden="true"></span>
+        </button>
       </div>
       <div id="weaveTabPanel" class="widget-tab-panel active" role="tabpanel" aria-labelledby="tabWeaveBtn">
       <div class="weave-builder">
@@ -124,15 +127,15 @@
       <div>
             <div class="lbl">Rows</div>
             <div class="value-slider-wrap">
-              <input id="rowsInput" class="pill-slider value-slider" type="range" min="4" max="96" value="96" step="1">
-              <span id="rowsValue" class="value-slider-readout">96</span>
+              <input id="rowsInput" class="pill-slider value-slider" type="range" min="4" max="96" value="78" step="1">
+              <span id="rowsValue" class="value-slider-readout">78</span>
             </div>
       </div>
       <div>
             <div class="lbl">Columns</div>
             <div class="value-slider-wrap">
-              <input id="colsInput" class="pill-slider value-slider" type="range" min="4" max="96" value="96" step="1">
-              <span id="colsValue" class="value-slider-readout">96</span>
+              <input id="colsInput" class="pill-slider value-slider" type="range" min="4" max="96" value="78" step="1">
+              <span id="colsValue" class="value-slider-readout">78</span>
             </div>
       </div>
       </div>
@@ -235,6 +238,59 @@
       </div>
       <div id="overlayTabPanel" class="widget-tab-panel" role="tabpanel" aria-labelledby="tabOverlayBtn"></div>
       <div id="typeTabPanel" class="widget-tab-panel" role="tabpanel" aria-labelledby="tabTypeBtn"></div>
+      <div id="meanderTabPanel" class="widget-tab-panel" role="tabpanel" aria-labelledby="tabMeanderBtn">
+        <div class="weave-builder">
+          <div>
+            <div class="lbl">Meander border</div>
+            <div class="field-hint">Hooked Greek key just inside the fringe. Default matches the pink-on-purple starter weave; change colors anytime.</div>
+          </div>
+          <label class="checkbox-field">
+            <input id="meanderEnabledInput" type="checkbox" checked>
+            <span>Show meander on edges</span>
+          </label>
+          <div class="grid-2">
+            <div>
+              <div class="lbl">Path</div>
+              <input id="meanderLineInput" class="color-field" type="color" value="#9e64ff">
+            </div>
+            <div>
+              <div class="lbl">Ground</div>
+              <input id="meanderGroundInput" class="color-field" type="color" value="#ff5fad">
+            </div>
+          </div>
+          <div>
+            <div class="lbl with-value">
+              <span>Thickness</span>
+              <span id="meanderThicknessValue">7</span>
+            </div>
+            <div class="value-slider-wrap">
+              <input id="meanderThicknessInput" class="pill-slider value-slider" type="range" min="1" max="12" value="7" step="1">
+            </div>
+            <div class="field-hint">How many cells deep each meander band is (matches one motif step).</div>
+          </div>
+          <div class="grid-2">
+            <div>
+              <div class="lbl with-value">
+                <span>Rings</span>
+                <span id="meanderRingsValue">1</span>
+              </div>
+              <div class="value-slider-wrap">
+                <input id="meanderRingsInput" class="pill-slider value-slider" type="range" min="1" max="12" value="1" step="1">
+              </div>
+            </div>
+            <div>
+              <div class="lbl with-value">
+                <span>Gap</span>
+                <span id="meanderGapValue">0</span>
+              </div>
+              <div class="value-slider-wrap">
+                <input id="meanderGapInput" class="pill-slider value-slider" type="range" min="0" max="8" value="0" step="1">
+              </div>
+            </div>
+          </div>
+          <div class="field-hint">Extra rings nest toward the center; gap is plain weave cells between bands (like spacing extra rows/columns).</div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -340,37 +396,75 @@ const GLYPH_WIDTH = 5;
 const GLYPH_HEIGHT = 7;
 const SPACE_WIDTH = 4;
 const S = {
-  rows: 70,
-  cols: 70,
+  /** 78 with inset 1 + thickness 6 →64 cells along each inner edge = eight 8-wide meander units. */
+  rows: 78,
+  cols: 78,
   cellWidth: 24,
   cellHeight: 24,
-  background: '#f0efef',
+  background: '#d7d1ca',
   weaveMode: 'checker',
   warp: {
     row: { style: 'off', amount: 0, repeats: 4, stagger: 50 },
     col: { style: 'off', amount: 0, repeats: 4, stagger: 50 }
   },
-  rowStripes: [
-    { color: DEFAULT_PALETTE[0], size: 1 },
-    { color: DEFAULT_PALETTE[1], size: 1 },
-    { color: DEFAULT_PALETTE[2], size: 1 }
-  ],
-  colStripes: [
-    { color: DEFAULT_PALETTE[1], size: 1 },
-    { color: DEFAULT_PALETTE[3], size: 1 },
-    { color: DEFAULT_PALETTE[4], size: 1 }
-  ],
-  rowBandWeights: [96],
-  colBandWeights: [96],
-  rowBandSizes: [96],
-  colBandSizes: [96],
+  rowStripes: [{ color: DEFAULT_PALETTE[0], size: 1 }],
+  colStripes: [{ color: DEFAULT_PALETTE[2], size: 1 }],
+  rowBandWeights: [78],
+  colBandWeights: [78],
+  rowBandSizes: [78],
+  colBandSizes: [78],
   rowBandScales: [1],
   colBandScales: [1],
   edgeSquish: { top: 0, right: 0, bottom: 0, left: 0 },
+  meander: {
+    enabled: true,
+    inset: 1,
+    thickness: 7,
+    rings: 1,
+    gap: 0,
+    lineColor: '#9e64ff',
+    groundColor: '#ff5fad'
+  },
   cells: [],
   overlays: [],
   textOverlays: []
 };
+
+/**
+ * Greek key tiles: 1 = path (line color), 0 = ground. Row 0 = outer rail, last row = inner rail.
+ * topH is band × tw; tl is band×band NW corner. Vertical arms: leftV = top strip turned90° CW
+ * (each row reversed along the vertical period); rightV = 90° CCW (same row order as topH).
+ */
+function finalizeMeanderVariant(spec) {
+  const topH = spec.topH;
+  const band = topH.length;
+  const tw = topH[0].length;
+  const tl = spec.tl || topH.map(row => row.slice(0, band));
+  let leftV = spec.leftV;
+  if (!leftV) {
+    leftV = topH.map(row => row.split('').reverse().join(''));
+  }
+  let rightV = spec.rightV;
+  if (!rightV) {
+    rightV = topH.map(row => row);
+  }
+  return { band, tw, th: tw, topH, tl, leftV, rightV };
+}
+
+/** Continuous Greek key — one 8×7 period transcribed from the reference SVG (Asset 9).
+ * Each motif fills cols 0–6 on the top rail plus a shared bottom connector cols 2–7 at
+ * row 6, so tiling makes one unbroken meander line. */
+const MEANDER_SPEC = finalizeMeanderVariant({
+  topH: [
+    '11111110',
+    '10000010',
+    '10111010',
+    '10101010',
+    '10101110',
+    '10100000',
+    '10111111'
+  ]
+});
 
 const refs = {
   canvas: document.getElementById('loomCanvas'),
@@ -380,10 +474,21 @@ const refs = {
   tabWarpBtn: document.getElementById('tabWarpBtn'),
   tabOverlayBtn: document.getElementById('tabOverlayBtn'),
   tabTypeBtn: document.getElementById('tabTypeBtn'),
+  tabMeanderBtn: document.getElementById('tabMeanderBtn'),
   weaveTabPanel: document.getElementById('weaveTabPanel'),
   warpTabPanel: document.getElementById('warpTabPanel'),
   overlayTabPanel: document.getElementById('overlayTabPanel'),
   typeTabPanel: document.getElementById('typeTabPanel'),
+  meanderTabPanel: document.getElementById('meanderTabPanel'),
+  meanderEnabledInput: document.getElementById('meanderEnabledInput'),
+  meanderLineInput: document.getElementById('meanderLineInput'),
+  meanderGroundInput: document.getElementById('meanderGroundInput'),
+  meanderThicknessInput: document.getElementById('meanderThicknessInput'),
+  meanderThicknessValue: document.getElementById('meanderThicknessValue'),
+  meanderRingsInput: document.getElementById('meanderRingsInput'),
+  meanderRingsValue: document.getElementById('meanderRingsValue'),
+  meanderGapInput: document.getElementById('meanderGapInput'),
+  meanderGapValue: document.getElementById('meanderGapValue'),
   weaveModeSelect: document.getElementById('weaveModeSelect'),
   rowStripeEditor: document.getElementById('rowStripeEditor'),
   colStripeEditor: document.getElementById('colStripeEditor'),
@@ -1435,10 +1540,13 @@ function overlayBounds(overlay, geometry) {
 
 function patternPointFromClient(clientX, clientY) {
   const geometry = geometryCache || buildGeometry();
+  const fringe = patternFringeMargin(geometry);
   const rect = refs.canvas.getBoundingClientRect();
   if (!rect.width || !rect.height) return null;
-  const x = (clientX - rect.left) / rect.width * geometry.width;
-  const y = (clientY - rect.top) / rect.height * geometry.height;
+  const innerW = geometry.width + 2 * fringe;
+  const innerH = geometry.height + 2 * fringe;
+  const x = (clientX - rect.left) / rect.width * innerW - fringe;
+  const y = (clientY - rect.top) / rect.height * innerH - fringe;
   return { x, y, geometry, rect };
 }
 
@@ -1449,6 +1557,189 @@ function cellPolygon(geometry, row, col) {
     geometry.gridPoints[row + 1][col + 1],
     geometry.gridPoints[row + 1][col]
   ];
+}
+
+function weaveFringeDelta(geometry, row, col) {
+  const rw = geometry.colWidths[col] ?? S.cellWidth;
+  const rh = geometry.rowHeights[row] ?? S.cellHeight;
+  return Math.max(1.65, Math.min(rw, rh) * 1.52);
+}
+
+function patternFringeMargin(geometry) {
+  if (!S.rows || !S.cols) return 0;
+  let max = 0;
+  for (let col = 0; col < S.cols; col += 1) {
+    max = Math.max(max, weaveFringeDelta(geometry, 0, col));
+    max = Math.max(max, weaveFringeDelta(geometry, S.rows - 1, col));
+  }
+  for (let row = 0; row < S.rows; row += 1) {
+    max = Math.max(max, weaveFringeDelta(geometry, row, 0));
+    max = Math.max(max, weaveFringeDelta(geometry, row, S.cols - 1));
+  }
+  return max;
+}
+
+function meanderInset() {
+  return Math.max(0, S.meander.inset | 0);
+}
+
+function meanderThicknessEffective(rows, cols, spec = MEANDER_SPEC) {
+  if (!spec) return 0;
+  const maxHalf = Math.floor(Math.min(rows, cols) / 2);
+  const inset = meanderInset();
+  const cap = maxHalf - inset;
+  if (cap < 1) return 0;
+  const raw = Math.max(1, Number(S.meander.thickness) || 4);
+  return Math.min(raw, cap);
+}
+
+function meanderEffectiveRings(rows, cols, spec = MEANDER_SPEC) {
+  if (!spec) return 0;
+  const maxHalf = Math.floor(Math.min(rows, cols) / 2);
+  const inset = meanderInset();
+  const t = meanderThicknessEffective(rows, cols, spec);
+  if (t < 1) return 0;
+  const g = Math.max(0, Number(S.meander.gap) || 0);
+  const want = Math.max(1, Number(S.meander.rings) || 1);
+  let n = 0;
+  for (let k = 0; k < want; k += 1) {
+    const base = inset + k * (t + g);
+    if (base + t > maxHalf) break;
+    n += 1;
+  }
+  return n;
+}
+
+function meanderRingAtCell(row, col, rows, cols) {
+  if (!S.meander.enabled) return null;
+  const spec = MEANDER_SPEC;
+  const d = Math.min(row, rows - 1 - row, col, cols - 1 - col);
+  const inset = meanderInset();
+  const t = meanderThicknessEffective(rows, cols, spec);
+  const g = Math.max(0, Number(S.meander.gap) || 0);
+  const ringCount = meanderEffectiveRings(rows, cols, spec);
+  if (ringCount < 1 || t < 1) return null;
+  for (let k = 0; k < ringCount; k += 1) {
+    const base = inset + k * (t + g);
+    if (d >= base && d < base + t) return { base, thickness: t, spec };
+  }
+  return null;
+}
+
+function meanderCoversCell(row, col, rows, cols) {
+  return meanderRingAtCell(row, col, rows, cols) != null;
+}
+
+function meanderColors() {
+  return {
+    line: S.meander.lineColor || DEFAULT_PALETTE[0],
+    ground: S.meander.groundColor || DEFAULT_PALETTE[2]
+  };
+}
+
+function meanderPatIx(local, span, design) {
+  if (span <= design) return local;
+  return local % design;
+}
+
+function meanderTileBitAtRing(spec, row, col, rows, cols, b, thickness) {
+  const design = spec.band;
+  const { tw, th } = spec;
+  const leftV = spec.leftV || spec.topH;
+  const rightV = spec.rightV || spec.topH;
+  const bit = ch => (ch === '1' ? 1 : 0);
+  const lr = row - b;
+  const lc = col - b;
+  const pr = meanderPatIx(lr, thickness, design);
+  const pc = meanderPatIx(lc, thickness, design);
+
+  const r0 = b;
+  const r1 = b + thickness - 1;
+  const c0 = b;
+  const c1 = b + thickness - 1;
+  const cMid0 = b + thickness;
+  const cMid1 = cols - b - thickness - 1;
+  const rMid0 = b + thickness;
+  const rMid1 = rows - b - thickness - 1;
+
+  const inTL = row >= r0 && row <= r1 && col >= c0 && col <= c1;
+  const inTR = row >= r0 && row <= r1 && col >= cols - b - thickness && col <= cols - b - 1;
+  const inBL = row >= rows - b - thickness && row <= rows - b - 1 && col >= c0 && col <= c1;
+  const inBR = row >= rows - b - thickness && row <= rows - b - 1
+    && col >= cols - b - thickness && col <= cols - b - 1;
+
+  if (inTL) return bit(spec.tl[pr][pc]);
+  if (inTR) return bit(spec.tl[pr][meanderPatIx((cols - b - 1) - col, thickness, design)]);
+  if (inBL) return bit(spec.tl[meanderPatIx((rows - b - 1) - row, thickness, design)][pc]);
+  if (inBR) {
+    return bit(spec.tl[
+      meanderPatIx((rows - b - 1) - row, thickness, design)
+    ][meanderPatIx((cols - b - 1) - col, thickness, design)]);
+  }
+
+  if (row >= r0 && row <= r1 && col >= cMid0 && col <= cMid1) {
+    return bit(spec.topH[pr][(col - cMid0) % tw]);
+  }
+  if (row >= rows - b - thickness && row <= rows - b - 1 && col >= cMid0 && col <= cMid1) {
+    const dr = rows - b - 1 - row;
+    return bit(spec.topH[meanderPatIx(dr, thickness, design)][(col - cMid0) % tw]);
+  }
+  if (col >= c0 && col <= c1 && row >= rMid0 && row <= rMid1) {
+    return bit(leftV[meanderPatIx(col - b, thickness, design)][(row - rMid0) % th]);
+  }
+  if (col >= cols - b - thickness && col <= cols - b - 1 && row >= rMid0 && row <= rMid1) {
+    const dc = cols - b - 1 - col;
+    return bit(rightV[meanderPatIx(dc, thickness, design)][(row - rMid0) % th]);
+  }
+  return 0;
+}
+
+function meanderTileBit(row, col, rows, cols) {
+  const ring = meanderRingAtCell(row, col, rows, cols);
+  if (!ring) return 0;
+  return meanderTileBitAtRing(ring.spec, row, col, rows, cols, ring.base, ring.thickness);
+}
+
+/**
+ * Warp tails: odd columns (1-based) at top; staggered at bottom (even 1-based columns)
+ * so the leftmost column does not drop — matches corner reference.
+ * Weft: even rows (1-based) left, odd rows (1-based) right.
+ * Four corner cells never fringe (neighbor extends toward the corner instead).
+ */
+function cellPolygonWithWeaveFringe(geometry, row, col) {
+  const points = cellPolygon(geometry, row, col).map(p => ({ x: p.x, y: p.y }));
+  if (meanderCoversCell(row, col, S.rows, S.cols)) {
+    return points;
+  }
+  const extend = weaveFringeDelta(geometry, row, col);
+  const top = row === 0;
+  const bottom = row === S.rows - 1;
+  const left = col === 0;
+  const right = col === S.cols - 1;
+  const oddCol1Based = col % 2 === 0;
+  const oddRow1Based = row % 2 === 0;
+  const evenRow1Based = row % 2 === 1;
+  const cornerTL = top && left;
+  const cornerTR = top && right;
+  const cornerBL = bottom && left;
+  const cornerBR = bottom && right;
+  if (top && oddCol1Based && !cornerTL && !cornerTR) {
+    points[0].y -= extend;
+    points[1].y -= extend;
+  }
+  if (bottom && !oddCol1Based && !cornerBL && !cornerBR) {
+    points[2].y += extend;
+    points[3].y += extend;
+  }
+  if (left && evenRow1Based && !cornerTL && !cornerBL) {
+    points[0].x -= extend;
+    points[3].x -= extend;
+  }
+  if (right && oddRow1Based && !cornerTR && !cornerBR) {
+    points[1].x += extend;
+    points[2].x += extend;
+  }
+  return points;
 }
 
 function cellCenter(geometry, row, col) {
@@ -1664,10 +1955,18 @@ function resolvedCellColor(row, col, geometry, overlayMaps, textOverlayMaps) {
 }
 
 function motifSegments(row, col, geometry, overlayMaps, textOverlayMaps) {
+  if (meanderCoversCell(row, col, S.rows, S.cols)) {
+    const b = meanderTileBit(row, col, S.rows, S.cols);
+    const { line, ground } = meanderColors();
+    return [{
+      points: cellPolygonWithWeaveFringe(geometry, row, col),
+      color: b ? line : ground
+    }];
+  }
   const color = resolvedCellColor(row, col, geometry, overlayMaps, textOverlayMaps);
   if (!color) return [];
   return [{
-    points: cellPolygon(geometry, row, col),
+    points: cellPolygonWithWeaveFringe(geometry, row, col),
     color
   }];
 }
@@ -1723,12 +2022,15 @@ function drawPattern(ctx, geometry) {
 
 function renderCanvas() {
   const geometry = buildGeometry();
+  const fringe = patternFringeMargin(geometry);
+  const paddedW = geometry.width + 2 * fringe;
+  const paddedH = geometry.height + 2 * fringe;
   const dpr = window.devicePixelRatio || 1;
   const maxWidth = refs.panel.clientWidth - 120;
   const maxHeight = refs.panel.clientHeight - 120;
-  const scale = Math.min(maxWidth / geometry.width, maxHeight / geometry.height, 1);
-  let cssWidth = Math.max(120, geometry.width * scale);
-  let cssHeight = Math.max(120, geometry.height * scale);
+  const scale = Math.min(maxWidth / paddedW, maxHeight / paddedH, 1);
+  let cssWidth = Math.max(120, paddedW * scale);
+  let cssHeight = Math.max(120, paddedH * scale);
   if (!hasAppliedInitialCanvasSize) {
     const initialMaxSize = 770;
     const initialScale = Math.min(initialMaxSize / cssWidth, initialMaxSize / cssHeight, 1);
@@ -1742,8 +2044,8 @@ function renderCanvas() {
   canvas.width = Math.round(cssWidth * dpr);
   canvas.height = Math.round(cssHeight * dpr);
   const ctx = canvas.getContext('2d');
-  ctx.setTransform(dpr * scale, 0, 0, dpr * scale, 0, 0);
-  ctx.clearRect(0, 0, geometry.width, geometry.height);
+  ctx.setTransform(dpr * scale, 0, 0, dpr * scale, dpr * scale * fringe, dpr * scale * fringe);
+  ctx.clearRect(-fringe, -fringe, paddedW, paddedH);
   drawPattern(ctx, geometry);
 }
 
@@ -2301,6 +2603,15 @@ function syncControls() {
   updateValueSlider(refs.colsInput, refs.colsValue, S.cols);
   refs.backgroundInput.value = S.background;
   refs.weaveModeSelect.value = S.weaveMode;
+  refs.meanderEnabledInput.checked = S.meander.enabled;
+  refs.meanderLineInput.value = S.meander.lineColor;
+  refs.meanderGroundInput.value = S.meander.groundColor;
+  refs.meanderThicknessInput.value = S.meander.thickness;
+  updateValueSlider(refs.meanderThicknessInput, refs.meanderThicknessValue, S.meander.thickness);
+  refs.meanderRingsInput.value = S.meander.rings;
+  updateValueSlider(refs.meanderRingsInput, refs.meanderRingsValue, S.meander.rings);
+  refs.meanderGapInput.value = S.meander.gap;
+  updateValueSlider(refs.meanderGapInput, refs.meanderGapValue, S.meander.gap);
 }
 
 function updateValueSlider(input, readout, value) {
@@ -2370,7 +2681,8 @@ function renderControlTabs() {
     { id: 'weave', button: refs.tabWeaveBtn, panel: refs.weaveTabPanel },
     { id: 'warp', button: refs.tabWarpBtn, panel: refs.warpTabPanel },
     { id: 'overlay', button: refs.tabOverlayBtn, panel: refs.overlayTabPanel },
-    { id: 'type', button: refs.tabTypeBtn, panel: refs.typeTabPanel }
+    { id: 'type', button: refs.tabTypeBtn, panel: refs.typeTabPanel },
+    { id: 'meander', button: refs.tabMeanderBtn, panel: refs.meanderTabPanel }
   ];
 
   tabs.forEach(tab => {
@@ -2406,6 +2718,34 @@ function initControlTabs() {
   refs.tabWarpBtn.addEventListener('click', () => setActiveControlTab('warp'));
   refs.tabOverlayBtn.addEventListener('click', () => setActiveControlTab('overlay'));
   refs.tabTypeBtn.addEventListener('click', () => setActiveControlTab('type'));
+  refs.tabMeanderBtn.addEventListener('click', () => setActiveControlTab('meander'));
+  refs.meanderEnabledInput.addEventListener('change', event => {
+    S.meander.enabled = event.target.checked;
+    renderCanvas();
+  });
+  refs.meanderLineInput.addEventListener('input', event => {
+    S.meander.lineColor = event.target.value;
+    renderCanvas();
+  });
+  refs.meanderGroundInput.addEventListener('input', event => {
+    S.meander.groundColor = event.target.value;
+    renderCanvas();
+  });
+  refs.meanderThicknessInput.addEventListener('input', event => {
+    S.meander.thickness = Number(event.target.value);
+    updateValueSlider(refs.meanderThicknessInput, refs.meanderThicknessValue, S.meander.thickness);
+    renderCanvas();
+  });
+  refs.meanderRingsInput.addEventListener('input', event => {
+    S.meander.rings = Number(event.target.value);
+    updateValueSlider(refs.meanderRingsInput, refs.meanderRingsValue, S.meander.rings);
+    renderCanvas();
+  });
+  refs.meanderGapInput.addEventListener('input', event => {
+    S.meander.gap = Number(event.target.value);
+    updateValueSlider(refs.meanderGapInput, refs.meanderGapValue, S.meander.gap);
+    renderCanvas();
+  });
   renderControlTabs();
 }
 
@@ -2489,7 +2829,11 @@ function findCellAtPoint(clientX, clientY) {
   const point = patternPointFromClient(clientX, clientY);
   if (!point) return null;
   const { x, y, geometry } = point;
-  if (x < 0 || y < 0 || x > geometry.width || y > geometry.height) return null;
+  const fringe = patternFringeMargin(geometry);
+  const eps = 1e-6;
+  if (x < -fringe - eps || y < -fringe - eps || x > geometry.width + fringe + eps || y > geometry.height + fringe + eps) {
+    return null;
+  }
 
   const approxRow = offsetIndexAtPoint(y, geometry.rowOffsets, geometry.rowHeights);
   const approxCol = offsetIndexAtPoint(x, geometry.colOffsets, geometry.colWidths);
@@ -2500,7 +2844,7 @@ function findCellAtPoint(clientX, clientY) {
 
   for (let row = rowStart; row <= rowEnd; row += 1) {
     for (let col = colStart; col <= colEnd; col += 1) {
-      if (pointInPolygon(x, y, cellPolygon(geometry, row, col))) {
+      if (pointInPolygon(x, y, cellPolygonWithWeaveFringe(geometry, row, col))) {
         return { row, col };
       }
     }
@@ -2508,7 +2852,7 @@ function findCellAtPoint(clientX, clientY) {
 
   for (let row = 0; row < S.rows; row += 1) {
     for (let col = 0; col < S.cols; col += 1) {
-      if (pointInPolygon(x, y, cellPolygon(geometry, row, col))) {
+      if (pointInPolygon(x, y, cellPolygonWithWeaveFringe(geometry, row, col))) {
         return { row, col };
       }
     }
@@ -2769,12 +3113,15 @@ function svgPolyline(points, stroke, strokeWidth) {
 
 function buildPatternSVG() {
   const geometry = buildGeometry();
+  const fringe = patternFringeMargin(geometry);
+  const vbW = geometry.width + 2 * fringe;
+  const vbH = geometry.height + 2 * fringe;
   const overlayMaps = prepareOverlayMaps(geometry);
   const textOverlayMaps = prepareTextOverlayMaps();
   const parts = [
     '<?xml version="1.0" encoding="UTF-8"?>',
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${geometry.width.toFixed(2)}" height="${geometry.height.toFixed(2)}" viewBox="0 0 ${geometry.width.toFixed(2)} ${geometry.height.toFixed(2)}">`,
-    `  <rect width="${geometry.width.toFixed(2)}" height="${geometry.height.toFixed(2)}" fill="${S.background}"></rect>`,
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${vbW.toFixed(2)}" height="${vbH.toFixed(2)}" viewBox="${(-fringe).toFixed(2)} ${(-fringe).toFixed(2)} ${vbW.toFixed(2)} ${vbH.toFixed(2)}">`,
+    `  <rect x="${(-fringe).toFixed(2)}" y="${(-fringe).toFixed(2)}" width="${vbW.toFixed(2)}" height="${vbH.toFixed(2)}" fill="${S.background}"></rect>`,
     `  <g opacity="0.32" stroke="white" stroke-width="${Math.max(1, Math.min(S.cellWidth, S.cellHeight) * 0.06).toFixed(2)}">`
   ];
 
@@ -2829,13 +3176,15 @@ function saveSVG() {
 
 function savePNG(width) {
   const geometry = buildGeometry();
+  const fringe = patternFringeMargin(geometry);
   const scale = width / geometry.width;
-  const height = Math.round(geometry.height * scale);
+  const padPx = fringe * scale;
   const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
+  canvas.width = Math.round(width + 2 * padPx);
+  canvas.height = Math.round(geometry.height * scale + 2 * padPx);
   const ctx = canvas.getContext('2d');
-  ctx.setTransform(scale, 0, 0, scale, 0, 0);
+  ctx.setTransform(scale, 0, 0, scale, padPx, padPx);
+  ctx.clearRect(-fringe, -fringe, geometry.width + 2 * fringe, geometry.height + 2 * fringe);
   drawPattern(ctx, geometry);
   canvas.toBlob(blob => {
     if (blob) downloadBlob(blob, 'loom-pattern.png');

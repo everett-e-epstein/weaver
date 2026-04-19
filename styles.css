@@ -108,7 +108,6 @@ textarea {
   /* padding: 28px;
   border-radius: 26px; */
   background: rgba(239, 230, 255, 0.18);
-  border: 1px solid rgba(158, 100, 255, 0.18);
   backdrop-filter: blur(10px);
   /* box-shadow:
     0 40px 80px rgba(18, 12, 59, 0.34),
@@ -119,7 +118,7 @@ textarea {
   display: block;
   max-width: 100%;
   max-height: 100%;
-  border-radius: 12px;
+  border-radius: 0;
   /* box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2); */
   cursor: default;
   touch-action: none;
@@ -379,6 +378,13 @@ textarea {
   mask-image: url("assets/type.svg");
 }
 
+.icon-meander {
+  -webkit-mask-image: url("assets/meander.svg");
+  mask-image: url("assets/meander.svg");
+  -webkit-mask-size: 68% 68%;
+  mask-size: 68% 68%;
+}
+
 .widget-tab:hover,
 .widget-tab:focus-visible {
   border-color: rgba(255, 255, 255, 0.65);
@@ -403,8 +409,24 @@ textarea {
 
 #warpTabPanel,
 #overlayTabPanel,
-#typeTabPanel {
+#typeTabPanel,
+#meanderTabPanel {
   margin: 4px 16px 20px !important
+}
+
+.checkbox-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: rgb(232 216 255);
+  cursor: pointer;
+  font-family: 'Publisher Rounded Slab';
+}
+
+.checkbox-field input {
+  width: auto;
+  margin: 0;
 }
 
 .widget.collapsed .widget-body-wrap {
